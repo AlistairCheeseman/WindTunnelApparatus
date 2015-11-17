@@ -69,7 +69,7 @@
 #########
 #Journal - files
 #########
-!*.jou
+#!*.jou
 #########
 #Reports
 #########
@@ -84,3 +84,6 @@
 !*.elf
 !*.bmm
 !*.xmp
+## custom additional ignore Files
+**/*.cache/
+**/*.runs/
