@@ -1,0 +1,125 @@
+﻿<Window x:Class="UI.Menu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        mc:Ignorable="d"
+        Title="Menu" Height="405.899" Width="497.005">
+    <Grid>
+        <GroupBox x:Name="groupBox" Header="Motion control" HorizontalAlignment="Left" Height="143" Margin="10,10,0,0" VerticalAlignment="Top" Width="231">
+            <Grid>
+
+                <Button x:Name="button" Content="Set Zero" HorizontalAlignment="Left" Height="23" Margin="108,88,0,0" VerticalAlignment="Top" Width="99"/>
+
+                <Button Content="Auto zero" HorizontalAlignment="Left" Height="23" Margin="4,10,0,0" VerticalAlignment="Top" Width="99"/>
+                <GroupBox Header="Current Position" Margin="108,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <StackPanel >
+                        <TextBlock   Text="x:  0.0mm" />
+                        <TextBlock   Text="y:  0.0mm" />
+                        <TextBlock  Text="r:  0.0deg" />
+                    </StackPanel>
+                </GroupBox>
+                <Button  Content="&#x25B2;" HorizontalAlignment="Left" Margin="37,37,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x21B6;" HorizontalAlignment="Left" Margin="17,99,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x25C0;" HorizontalAlignment="Left" Margin="17,57,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x25BC;" HorizontalAlignment="Left" Margin="37,77,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x21B7;" HorizontalAlignment="Left" Margin="57,99,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x25B6;" HorizontalAlignment="Left" Margin="57,57,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Connections" Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Top" Width="233">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Flow Sensor" />
+                <TextBlock Grid.Row="1" Text="Pressure Array" />
+                <TextBlock Grid.Row="2" Text="Stepper Controller" />
+
+
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="Sync Good" Background="Green" />
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="Sync Good" Background="Green" />
+                <TextBlock Grid.Column="1" Grid.Row="2" Text="Sync Good" Background="Green" />
+
+
+            </Grid>
+
+
+        </GroupBox>
+        <GroupBox Header="Current Readings" Margin="10,164,248,10" >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Hot Wire 1" />
+                <TextBlock Grid.Row="1" Text="Pressure 1" />
+                <TextBlock Grid.Row="2" Text="Pressure 2" />
+                <TextBlock Grid.Row="3" Text="Pressure 3" />
+                <TextBlock Grid.Row="4" Text="Pressure 4" />
+                <TextBlock Grid.Row="5" Text="Pressure 5" />
+                <TextBlock Grid.Row="6" Text="Pressure 6" />
+                <TextBlock Grid.Row="7" Text="Pressure 7" />
+                <TextBlock Grid.Row="8" Text="Pressure 8" />
+                <TextBlock Grid.Row="9" Text="Pressure 9" />
+                <TextBlock Grid.Row="10" Text="Pressure 10" />
+
+
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="1Pa" />
+                <TextBlock Grid.Column="1" Grid.Row="2" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="3" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="4" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="5" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="6" Text="N/A" />
+                <TextBlock Grid.Column="1" Grid.Row="7" Text="0Pa" />
+                <TextBlock Grid.Column="1" Grid.Row="8" Text="0Pa" />
+                <TextBlock Grid.Column="1" Grid.Row="9" Text="1Pa" />
+                <TextBlock Grid.Column="1" Grid.Row="10" Text="300Pa" />
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBox1" Header="Capture Settings" HorizontalAlignment="Left" Height="160" Margin="246,86,0,0" VerticalAlignment="Top" Width="233">
+            <Grid>
+                <GroupBox Header="Start Values" Margin="10,7,121,57" >
+                    <StackPanel >
+                        <TextBlock   Text="x:  0.0mm" />
+                        <TextBlock   Text="y:  0.0mm" />
+                        <TextBlock  Text="r:  0.0deg" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="End Values" Margin="106,7,10,57" >
+                    <StackPanel >
+                        <TextBlock   Text="x:  0.0mm" />
+                        <TextBlock   Text="y:  0.0mm" />
+                        <TextBlock  Text="r:  0.0deg" />
+                    </StackPanel>
+                </GroupBox>
+                <TextBlock Text="Duration:   10secs" Height="19" VerticalAlignment="Top" HorizontalAlignment="Left" Width="96" Margin="10,81,0,0" />
+
+                <Button Content="Start" Height="23" VerticalAlignment="Bottom" Margin="10,0,10,10" />
+
+            </Grid>
+        </GroupBox>
+
+    </Grid>
+</Window>
