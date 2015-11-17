@@ -113,7 +113,7 @@ ARCHITECTURE design_1_mii_to_rmii_0_0_arch OF design_1_mii_to_rmii_0_0 IS
   ATTRIBUTE CHECK_LICENSE_TYPE : STRING;
   ATTRIBUTE CHECK_LICENSE_TYPE OF design_1_mii_to_rmii_0_0_arch : ARCHITECTURE IS "design_1_mii_to_rmii_0_0,mii_to_rmii,{}";
   ATTRIBUTE CORE_GENERATION_INFO : STRING;
-  ATTRIBUTE CORE_GENERATION_INFO OF design_1_mii_to_rmii_0_0_arch: ARCHITECTURE IS "design_1_mii_to_rmii_0_0,mii_to_rmii,{x_ipProduct=Vivado 2015.2,x_ipVendor=xilinx.com,x_ipLibrary=ip,x_ipName=mii_to_rmii,x_ipVersion=2.0,x_ipCoreRevision=7,x_ipLanguage=VERILOG,x_ipSimLanguage=MIXED,C_INSTANCE=design_1_mii_to_rmii_0_0,C_FIXED_SPEED=1,C_SPEED_100=1}";
+  ATTRIBUTE CORE_GENERATION_INFO OF design_1_mii_to_rmii_0_0_arch: ARCHITECTURE IS "design_1_mii_to_rmii_0_0,mii_to_rmii,{x_ipProduct=Vivado 2015.2,x_ipVendor=xilinx.com,x_ipLibrary=ip,x_ipName=mii_to_rmii,x_ipVersion=2.0,x_ipCoreRevision=7,x_ipLanguage=VHDL,x_ipSimLanguage=MIXED,C_INSTANCE=design_1_mii_to_rmii_0_0,C_FIXED_SPEED=1,C_SPEED_100=1}";
   ATTRIBUTE X_INTERFACE_INFO : STRING;
   ATTRIBUTE X_INTERFACE_INFO OF rst_n: SIGNAL IS "xilinx.com:signal:reset:1.0 rst RST";
   ATTRIBUTE X_INTERFACE_INFO OF ref_clk: SIGNAL IS "xilinx.com:signal:clock:1.0 clock CLK";
