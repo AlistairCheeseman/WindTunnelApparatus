@@ -13,7 +13,7 @@ namespace UDPTest
     class Program
     {
         static DateTime startTime;
-        static uint bytesRec;
+        static long bytesRec;
         static System.Timers.Timer t;
 
         static void Main(string[] args)
@@ -25,7 +25,7 @@ namespace UDPTest
 
             try
             {
-                System.Net.IPEndPoint groupEP = new System.Net.IPEndPoint(System.Net.IPAddress.Any,1955);
+                System.Net.IPEndPoint groupEP = new System.Net.IPEndPoint(System.Net.IPAddress.Any,5001);
                 System.Net.Sockets.UdpClient listener = new System.Net.Sockets.UdpClient(groupEP);
                 Console.WriteLine("\rPackets Recd: ");
                 Console.WriteLine("\rTime: " + " Seconds");
@@ -38,11 +38,12 @@ namespace UDPTest
                 startTime = DateTime.Now;
                 bytesRec = 0;
                 t.Start();
+                byte[] data;
                 while (true)
                 {
-                    byte[] data = listener.Receive(ref groupEP);
-                    int size = data.Length;
-                    bytesRec += uint.Parse(size.ToString());
+                    data = listener.Receive(ref groupEP);
+                   
+                    bytesRec += data.Length;
                 }
             }
             catch (Exception ex)
