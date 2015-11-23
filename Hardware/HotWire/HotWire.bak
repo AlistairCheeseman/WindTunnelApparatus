@@ -1,0 +1,171 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L R R?
+U 1 1 564DBDBF
+P 1150 1900
+F 0 "R?" V 1230 1900 50  0000 C CNN
+F 1 "R" V 1150 1900 50  0000 C CNN
+F 2 "" V 1080 1900 30  0000 C CNN
+F 3 "" H 1150 1900 30  0000 C CNN
+	1    1150 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBE54
+P 1150 2450
+F 0 "R?" V 1230 2450 50  0000 C CNN
+F 1 "R" V 1150 2450 50  0000 C CNN
+F 2 "" V 1080 2450 30  0000 C CNN
+F 3 "" H 1150 2450 30  0000 C CNN
+	1    1150 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBEA3
+P 2300 1950
+F 0 "R?" V 2380 1950 50  0000 C CNN
+F 1 "R" V 2300 1950 50  0000 C CNN
+F 2 "" V 2230 1950 30  0000 C CNN
+F 3 "" H 2300 1950 30  0000 C CNN
+	1    2300 1950
+	0    1    1    0   
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBEC0
+P 2300 2250
+F 0 "R?" V 2380 2250 50  0000 C CNN
+F 1 "R" V 2300 2250 50  0000 C CNN
+F 2 "" V 2230 2250 30  0000 C CNN
+F 3 "" H 2300 2250 30  0000 C CNN
+	1    2300 2250
+	0    1    1    0   
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBEE7
+P 3750 1300
+F 0 "R?" V 3830 1300 50  0000 C CNN
+F 1 "R" V 3750 1300 50  0000 C CNN
+F 2 "" V 3680 1300 30  0000 C CNN
+F 3 "" H 3750 1300 30  0000 C CNN
+	1    3750 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBF5E
+P 4750 2200
+F 0 "R?" V 4830 2200 50  0000 C CNN
+F 1 "R" V 4750 2200 50  0000 C CNN
+F 2 "" V 4680 2200 30  0000 C CNN
+F 3 "" H 4750 2200 30  0000 C CNN
+	1    4750 2200
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DBFB5
+P 4950 1400
+F 0 "R?" V 5030 1400 50  0000 C CNN
+F 1 "R" V 4950 1400 50  0000 C CNN
+F 2 "" V 4880 1400 30  0000 C CNN
+F 3 "" H 4950 1400 30  0000 C CNN
+	1    4950 1400
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DC03A
+P 5000 900
+F 0 "R?" V 5080 900 50  0000 C CNN
+F 1 "R" V 5000 900 50  0000 C CNN
+F 2 "" V 4930 900 30  0000 C CNN
+F 3 "" H 5000 900 30  0000 C CNN
+	1    5000 900 
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DC0A7
+P 4550 3050
+F 0 "R?" V 4630 3050 50  0000 C CNN
+F 1 "R" V 4550 3050 50  0000 C CNN
+F 2 "" V 4480 3050 30  0000 C CNN
+F 3 "" H 4550 3050 30  0000 C CNN
+	1    4550 3050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 564DC137
+P 5300 3700
+F 0 "R?" V 5380 3700 50  0000 C CNN
+F 1 "R" V 5300 3700 50  0000 C CNN
+F 2 "" V 5230 3700 30  0000 C CNN
+F 3 "" H 5300 3700 30  0000 C CNN
+	1    5300 3700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1150 2050 1150 2300
+Wire Wire Line
+	2150 1950 2050 1950
+Wire Wire Line
+	2050 1950 2050 1750
+Wire Wire Line
+	2050 1750 850  1750
+Wire Wire Line
+	850  2600 2050 2600
+Wire Wire Line
+	2050 2600 2050 2250
+Wire Wire Line
+	2050 2250 2150 2250
+Connection ~ 1150 1750
+Connection ~ 1150 2600
+$EndSCHEMATC
