@@ -1,7 +1,7 @@
 (export (version D)
   (design
-    (source D:\repo\WindTunnelApparatus\Hardware\I2C\I2C.sch)
-    (date "17/11/2015 18:01:42")
+    (source D:/repo/WindTunnelApparatus/Hardware/I2C/I2C.sch)
+    (date "18/11/2015 10:41:08")
     (tool "Eeschema 4.0.0-rc1-stable")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -16,7 +16,7 @@
         (comment (number 4) (value "")))))
   (components
     (comp (ref P1)
-      (value DIL16)
+      (value SM9541)
       (footprint Housings_SOIC:SOIC-16_7.5x10.3mm_Pitch1.27mm)
       (libsource (lib conn) (part DIL16))
       (sheetpath (names /) (tstamps /))
@@ -46,6 +46,45 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 564B6790)))
   (libparts
+    (libpart (lib device) (part C)
+      (description "Unpolarized capacitor")
+      (footprints
+        (fp C?)
+        (fp C_????_*)
+        (fp C_????)
+        (fp SMD*_c)
+        (fp Capacitor*))
+      (fields
+        (field (name Reference) C)
+        (field (name Value) C))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib device) (part R)
+      (description Resistor)
+      (footprints
+        (fp R_*)
+        (fp Resistor_*))
+      (fields
+        (field (name Reference) R)
+        (field (name Value) R))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib conn) (part CONN_01X04)
+      (footprints
+        (fp Pin_Header_Straight_1X04)
+        (fp Pin_Header_Angled_1X04)
+        (fp Socket_Strip_Straight_1X04)
+        (fp Socket_Strip_Angled_1X04))
+      (fields
+        (field (name Reference) P)
+        (field (name Value) CONN_01X04))
+      (pins
+        (pin (num 1) (name P1) (type passive))
+        (pin (num 2) (name P2) (type passive))
+        (pin (num 3) (name P3) (type passive))
+        (pin (num 4) (name P4) (type passive))))
     (libpart (lib conn) (part DIL16)
       (fields
         (field (name Reference) P)
@@ -66,51 +105,12 @@
         (pin (num 13) (name 13) (type passive))
         (pin (num 14) (name 14) (type passive))
         (pin (num 15) (name 15) (type passive))
-        (pin (num 16) (name 16) (type passive))))
-    (libpart (lib device) (part R)
-      (description Resistor)
-      (footprints
-        (fp R_*)
-        (fp Resistor_*))
-      (fields
-        (field (name Reference) R)
-        (field (name Value) R))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))))
-    (libpart (lib device) (part C)
-      (description "Unpolarized capacitor")
-      (footprints
-        (fp C?)
-        (fp C_????_*)
-        (fp C_????)
-        (fp SMD*_c)
-        (fp Capacitor*))
-      (fields
-        (field (name Reference) C)
-        (field (name Value) C))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))))
-    (libpart (lib conn) (part CONN_01X04)
-      (footprints
-        (fp Pin_Header_Straight_1X04)
-        (fp Pin_Header_Angled_1X04)
-        (fp Socket_Strip_Straight_1X04)
-        (fp Socket_Strip_Angled_1X04))
-      (fields
-        (field (name Reference) P)
-        (field (name Value) CONN_01X04))
-      (pins
-        (pin (num 1) (name P1) (type passive))
-        (pin (num 2) (name P2) (type passive))
-        (pin (num 3) (name P3) (type passive))
-        (pin (num 4) (name P4) (type passive)))))
+        (pin (num 16) (name 16) (type passive)))))
   (libraries
-    (library (logical conn)
-      (uri D:\Program_Files\KiCad\share\kicad\library\conn.lib))
     (library (logical device)
-      (uri D:\Program_Files\KiCad\share\kicad\library\device.lib)))
+      (uri D:\Program_Files\KiCad\share\kicad\library\device.lib))
+    (library (logical conn)
+      (uri D:\Program_Files\KiCad\share\kicad\library\conn.lib)))
   (nets
     (net (code 1) (name "Net-(P1-Pad11)")
       (node (ref P1) (pin 11))
