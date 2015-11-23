@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shell", "Shell\Shell.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "UI\UI.csproj", "{20D8E413-A2DE-4ED4-B066-6D30D85F196C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "serialcharter", "serialcharter\serialcharter.csproj", "{E3AEAE59-03B0-43E1-BCB3-FEED88082586}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{20D8E413-A2DE-4ED4-B066-6D30D85F196C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20D8E413-A2DE-4ED4-B066-6D30D85F196C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20D8E413-A2DE-4ED4-B066-6D30D85F196C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3AEAE59-03B0-43E1-BCB3-FEED88082586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3AEAE59-03B0-43E1-BCB3-FEED88082586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3AEAE59-03B0-43E1-BCB3-FEED88082586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3AEAE59-03B0-43E1-BCB3-FEED88082586}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
