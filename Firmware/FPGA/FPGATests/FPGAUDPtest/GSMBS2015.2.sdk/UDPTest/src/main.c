@@ -49,9 +49,9 @@
 #endif
 
 /* defined by each RAW mode application */
-void print_app_header();
-int start_application();
-int transfer_data();
+void print_utxperf_app_header();
+int start_utxperf_application();
+int transfer_utxperf_data();
 
 /* missing declaration in lwIP */
 void lwip_init();
@@ -117,7 +117,7 @@ int main()
 	IP4_ADDR(&netmask, 255, 255, 255,  0);
 	IP4_ADDR(&gw,      192, 168,   1,  1);
 #endif	
-	print_app_header();
+	print_utxperf_app_header();
 
 	lwip_init();
 
@@ -165,7 +165,7 @@ int main()
 	print_ip_settings(&ipaddr, &netmask, &gw);
 
 	/* start the application (web server, rxtest, txtest, etc..) */
-	start_application();
+	start_utxperf_application();
 
 	/* receive and process packets */
 	while (1) {
@@ -178,7 +178,7 @@ int main()
 			TcpSlowTmrFlag = 0;
 		}
 		xemacif_input(echo_netif);
-		transfer_data();
+		transfer_utxperf_data();
 	}
   
 	/* never reached */

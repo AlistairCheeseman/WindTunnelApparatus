@@ -47,7 +47,7 @@
 #define LWIP_UDP 1
 #define UDP_TTL 255
 
-#define LWIP_TCP 1
+#define LWIP_TCP 0
 #define TCP_MSS 1460
 #define TCP_SND_BUF 8192
 #define TCP_WND 2048
