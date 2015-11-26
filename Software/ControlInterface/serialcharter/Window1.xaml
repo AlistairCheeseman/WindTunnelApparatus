@@ -30,11 +30,21 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 </d3:DataPointSeries.DataPointStyle>
             </d3:LineSeries>
         </d3:Chart>
-        <StackPanel Orientation="Horizontal" Margin="10,0,10,10" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="60" Width="847">
-            <Button Content="Start" x:Name="StartBtn" Margin="5,5,5,5" MinWidth="100" Click="StartBtn_Click"/>
-            <Button Content="Stop" x:Name="StopBtn"  Margin="5,5,5,5" MinWidth="100" Click="StopBtn_Click" />
-            <Button Content="Export" x:Name="ExportBtn" Margin="5,5,5,5" MinWidth="100" Click="ExportBtn_Click"/>
+        <StackPanel Margin="10,0,10,10" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="60" Width="847">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="COM Port" />
+                <TextBox x:Name="Comtxt" MinWidth="50" Margin="5,5,20,5"/>
+                <TextBlock Text="Baud" />
+                <TextBox x:Name="baudtxt" MinWidth="50" Margin="5,5,5,5"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" >
+                <Button Content="Start" x:Name="StartBtn" Margin="5,5,5,5" MinWidth="100" Click="StartBtn_Click"/>
+
+                <Button Content="Stop" x:Name="StopBtn"  Margin="5,5,5,5" MinWidth="100" Click="StopBtn_Click" />
+                <Button Content="Export" x:Name="ExportBtn" Margin="5,5,5,5" MinWidth="100" Click="ExportBtn_Click"/>
+            </StackPanel>
         </StackPanel>
+        
     </Grid>
 
 </Window>

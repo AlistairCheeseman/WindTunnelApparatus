@@ -43,10 +43,12 @@ namespace serialcharter
             lineChart.DataContext = Data; // set the data context for the chart
             StartBtn.IsEnabled = true;
             StopBtn.IsEnabled = false;
+            Comtxt.Text = "COM10";
+            baudtxt.Text = 9600.ToString();
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = new TimeSpan(0, 0, 0, 0, 500);  // per 500 milliseconds, could change it
             timer.Tick += new EventHandler(timer_Tick);
-            timer.IsEnabled = true; //set this to true to spawn data
+            timer.IsEnabled = false; //set this to true to spawn data
         }
         Random random = new Random(DateTime.Now.Millisecond);
         void timer_Tick(object sender, EventArgs e)
@@ -55,67 +57,97 @@ namespace serialcharter
         }
         private void initialiseserial()
         {
-            SP = new SerialPort();
-            SP.PortName = "COM10";
-            Console.WriteLine("Com port: " + SP.PortName.ToString());
-            SP.BaudRate = 9600;
-            Console.WriteLine("Baud rate: " + SP.BaudRate.ToString());
+            try
+            {
+                SP = new SerialPort();
+                SP.PortName = Comtxt.Text;
+                Console.WriteLine("Com port: " + SP.PortName.ToString());
+                int baud = int.Parse(baudtxt.Text);
+                SP.BaudRate = baud;
+                Console.WriteLine("Baud rate: " + SP.BaudRate.ToString());
 
-            Console.WriteLine("Stop bit: " + SP.StopBits.ToString());
-            Console.WriteLine("Parity bit: " + SP.Parity.ToString());
-            Console.WriteLine("Read Timeout: " + SP.ReadTimeout.ToString());
-            SP.Handshake = Handshake.XOnXOff;
-            SP.DataReceived += sp_DataReceived;
-            SP.Open();
-            int test = SP.BaseStream.ReadByte();
-            Console.WriteLine(test.ToString());
+                Console.WriteLine("Stop bit: " + SP.StopBits.ToString());
+                Console.WriteLine("Parity bit: " + SP.Parity.ToString());
+                Console.WriteLine("Read Timeout: " + SP.ReadTimeout.ToString());
+                SP.Handshake = Handshake.XOnXOff;
+                SP.DataReceived += sp_DataReceived;
+                SP.Open();
+                int test = SP.BaseStream.ReadByte();
+                Console.WriteLine(test.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                StartBtn.IsEnabled = true;
+                StopBtn.IsEnabled = false;
+            }
         }
         private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sep = (SerialPort)sender;
             string indata = sep.ReadExisting();
             string[] buffer;
-
             buffer = indata.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            foreach (string val in buffer)
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+    (System.Threading.ThreadStart)delegate ()
+    {
+        foreach (string val in buffer)
+        {
+            double value;
+            if (double.TryParse(val, out value))
             {
-                Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-                 {
-                     double value;
-                     if (double.TryParse(val, out value))
-                     {
-                         decimal cmH20 = (((decimal)value - offset) * scaleFactor);
-                         Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
-                     }
-                 }));
+                decimal cmH20 = (((decimal)value - offset) * scaleFactor);
+                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
             }
+        }
+    });
+            System.Threading.Thread.Sleep(50);
+            //  Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+            /*   Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
+              // Dispatcher.BeginInvoke((Action)(() =>
+               {
+                        foreach (string val in buffer)
+                        {
+                            double value;
+                            if (double.TryParse(val, out value))
+                            {
+                                decimal cmH20 = (((decimal)value - offset) * scaleFactor);
+                                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
+                            }
+                        }
+                    }));*/
         }
         private void Window_Closed(object sender, EventArgs e)
         {
             if (SP.IsOpen == true)
-            SP.Close();
+                SP.Close();
         }
 
         private void StartBtn_Click(object sender, RoutedEventArgs e)
         {
+            StopBtn.IsEnabled = true;
+            StartBtn.IsEnabled = false;
             Data = new ObservableCollection<data>();
             Start = DateTime.Now;
             initialiseserial();
-            StopBtn.IsEnabled = true;
-            StartBtn.IsEnabled = false;
+            lineChart.DataContext = Data; // set the data context for the chart
 
         }
 
         private void StopBtn_Click(object sender, RoutedEventArgs e)
         {
-            SP.Close();
+            if (SP.IsOpen == true)
+            {
+                SP.DataReceived -= sp_DataReceived;
+                SP.Close();
+            }
             StartBtn.IsEnabled = true;
             StopBtn.IsEnabled = false;
         }
 
         private void ExportBtn_Click(object sender, RoutedEventArgs e)
         {
-            
+
             if (System.IO.File.Exists("data.csv"))
             {
                 System.IO.File.Delete("data.csv");
