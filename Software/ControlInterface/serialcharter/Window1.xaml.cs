@@ -31,8 +31,9 @@ namespace serialcharter
     /// </summary>
     public partial class Window1 : Window
     {
-        private const decimal offset = 0;
-        private const decimal scaleFactor = 1;
+        //y = mx+c
+        private const decimal c = -1225.775135M;
+        private const decimal m = 0.1496398871M;
 
         static ObservableCollection<data> Data = new ObservableCollection<data>();
         SerialPort SP;
@@ -96,12 +97,13 @@ namespace serialcharter
             double value;
             if (double.TryParse(val, out value))
             {
-                decimal cmH20 = (((decimal)value - offset) * scaleFactor);
-                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
+                //y=mx+c
+                decimal Pa = m*((decimal)value) + c;
+                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, Pa));
             }
         }
     });
-            System.Threading.Thread.Sleep(50);
+           // System.Threading.Thread.Sleep(50);
             //  Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
             /*   Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
               // Dispatcher.BeginInvoke((Action)(() =>

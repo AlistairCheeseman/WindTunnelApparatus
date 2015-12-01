@@ -19,7 +19,7 @@ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     <d3:LinearAxis Orientation="X" Title="Time (Seconds)"  />
                 </d3:LineSeries.IndependentAxis>
                 <d3:LineSeries.DependentRangeAxis>
-                    <d3:LinearAxis Orientation="Y" Title="Reading" />
+                    <d3:LinearAxis Orientation="Y" Title="Pressure (Pa)" />
 
                 </d3:LineSeries.DependentRangeAxis>
                 <d3:DataPointSeries.DataPointStyle>
