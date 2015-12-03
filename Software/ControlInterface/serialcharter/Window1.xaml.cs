@@ -103,21 +103,6 @@ namespace serialcharter
             }
         }
     });
-           // System.Threading.Thread.Sleep(50);
-            //  Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-            /*   Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-              // Dispatcher.BeginInvoke((Action)(() =>
-               {
-                        foreach (string val in buffer)
-                        {
-                            double value;
-                            if (double.TryParse(val, out value))
-                            {
-                                decimal cmH20 = (((decimal)value - offset) * scaleFactor);
-                                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
-                            }
-                        }
-                    }));*/
         }
         private void Window_Closed(object sender, EventArgs e)
         {
