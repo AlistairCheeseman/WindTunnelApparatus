@@ -116,7 +116,6 @@ namespace serialcharter
             buffer = inData.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             foreach (string val in buffer)
             {
-
                 double value;
                 if (double.TryParse(val, out value))
                 {
