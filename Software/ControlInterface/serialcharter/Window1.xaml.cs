@@ -83,42 +83,62 @@ namespace serialcharter
                 StopBtn.IsEnabled = false;
             }
         }
+        string tail = String.Empty;
+        public delegate void MyDelegate(string inData);
         private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sep = (SerialPort)sender;
             string indata = sep.ReadExisting();
-            string[] buffer;
-            buffer = indata.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-    (System.Threading.ThreadStart)delegate ()
-    {
-        foreach (string val in buffer)
+
+            this.Dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, indata);
+        }
+
+        public void ProcessData(string inData)
         {
-            double value;
-            if (double.TryParse(val, out value))
+            inData = inData.Replace("\r", String.Empty); // clear out the extra rubbish
+            inData = tail + inData; // add the tail of the last packet to the beginning of this packet.
+            if (!inData.EndsWith("\n"))
+                if (inData.Contains('\n'))
+                {
+                    tail = inData.Substring(inData.LastIndexOf('\n')); // get the incomplete tail.
+                    inData = inData.Substring(0, inData.LastIndexOf('\n')); // make sure to remove the incomplete tail.
+                }
+                else
+                {
+                    tail = inData;
+                    inData = string.Empty;
+                }
+            else
+                tail = string.Empty;
+           
+
+            string[] buffer;
+            buffer = inData.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (string val in buffer)
             {
-                //y=mx+c
-                decimal Pa = m*((decimal)value) + c;
-                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, Pa));
+
+                double value;
+                if (double.TryParse(val, out value))
+                {
+                    if (value < 1000 | value > 16000)
+                    {
+                        //throw data out.
+                    }
+                    else
+                    {
+                        if (value != 8000)
+                        {
+                            Console.WriteLine(value.ToString());
+                        }
+                        //y=mx+c
+                        decimal Pa = m * ((decimal)value) + c;
+                        Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, Pa));
+                    }
+                    
+                }
             }
         }
-    });
-           // System.Threading.Thread.Sleep(50);
-            //  Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-            /*   Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-              // Dispatcher.BeginInvoke((Action)(() =>
-               {
-                        foreach (string val in buffer)
-                        {
-                            double value;
-                            if (double.TryParse(val, out value))
-                            {
-                                decimal cmH20 = (((decimal)value - offset) * scaleFactor);
-                                Data.Add(new data((DateTime.Now - Start).TotalMilliseconds, cmH20));
-                            }
-                        }
-                    }));*/
-        }
+
         private void Window_Closed(object sender, EventArgs e)
         {
             if (SP.IsOpen == true)
