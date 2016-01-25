@@ -353,7 +353,7 @@ F 1 "CONN_01X04" V 7450 5000 50  0000 C CNN
 F 2 "Terminal_Blocks:TerminalBlock_Pheonix_MPT-2.54mm_4pol" H 7350 5000 60  0001 C CNN
 F 3 "" H 7350 5000 60  0000 C CNN
 	1    7350 5000
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 $Comp
 L PWR_FLAG #FLG014
