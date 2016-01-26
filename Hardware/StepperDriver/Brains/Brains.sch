@@ -35,8 +35,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Stepper Motor Driver Controller"
-Date ""
-Rev ""
+Date "2016-01-26"
+Rev "A"
 Comp "MENG Flow Project"
 Comment1 ""
 Comment2 ""
