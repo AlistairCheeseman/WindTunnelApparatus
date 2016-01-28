@@ -49,68 +49,51 @@ end serialLoader;
 
 architecture Behavioral of serialLoader is
     type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_STARTWRITE, STATE_ENDWRITE);
-    signal state_next, state_reg: state_type := STATE_WAIT;
+    signal state_reg: state_type := STATE_WAIT;
     
 begin
 
-process (clk, FIFO_Empty, S_Ready, state_next, reset) -- process to handle the next state
+process (clk, FIFO_Empty, S_Ready, reset) -- process to handle the next state
 begin
 if (reset = '1') then
     --reset state:
     FIFO_ReadEn <= '0';
     S_Send <= '0';
-    state_next <= STATE_WAIT;
+    state_reg <= STATE_WAIT;
 else
     if rising_edge (clk) then
         case state_reg is
             when STATE_WAIT =>
                 if (FIFO_Empty = '1' or S_Ready = '0') then
-                    state_next <= STATE_WAIT;
+                    state_reg <= STATE_WAIT;
                 else
-                    state_next <= STATE_STARTREAD;
+                    state_reg <= STATE_STARTREAD;
                 end if;
             when STATE_STARTREAD =>
-                state_next <= STATE_ENDREAD;
+                -- request the data
+                FIFO_ReadEn <= '1';
+                state_reg <= STATE_ENDREAD;
             when STATE_ENDREAD =>
-                state_next <= STATE_STARTWRITE;
+                    --clock the data out
+                S_DataOut <= FIFO_Data;
+                FIFO_ReadEn <= '0';
+                state_reg <= STATE_STARTWRITE;
             when STATE_STARTWRITE =>
-                state_next <= STATE_ENDWRITE;
+                    -- tell the serial module to pickup the data
+                S_Send <= '1';
+                state_reg <= STATE_ENDWRITE;
             when STATE_ENDWRITE =>
+                -- close all the modules down
+                S_Send <= '0';
                 if (FIFO_Empty = '0' and S_Ready = '1') then
-                    state_next <= STATE_STARTREAD;
+                    state_reg <= STATE_STARTREAD;
                 else
-                    state_next <= STATE_WAIT;
+                    state_reg <= STATE_WAIT;
                 end if;
             when others =>
-                state_next <= STATE_WAIT;
+                state_reg <= STATE_WAIT;
         end case;
     end if;
 end if;    
-state_reg <= state_next;
 end process;
-	
-process(state_reg) -- process to handle the actual state change
-
-begin
-    case state_reg is
-        when STATE_WAIT =>
-        -- just wait
-        when STATE_STARTREAD =>
-        -- request the data
-            FIFO_ReadEn <= '1';
-        when STATE_ENDREAD =>
-        --clock the data out
-            S_DataOut <= FIFO_Data;
-            FIFO_ReadEn <= '0';
-        when STATE_STARTWRITE =>
-        -- tell the serial module to pickup the data
-            S_Send <= '1';
-        when STATE_ENDWRITE =>
-            -- close all the modules down
-            S_Send <= '0';
-        when others =>
-        --don't do anything, error handle
-    end case;
-end process;
-
 end Behavioral;
