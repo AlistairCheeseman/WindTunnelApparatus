@@ -1,3 +1,12 @@
+# apparently need this:
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+
+
+
+
+
+
 ##Pmod Header JA
 ##Bank = 15, Pin name = IO_L1N_T0_AD0N_15,					Sch name = JA1
 set_property PACKAGE_PIN B13 [get_ports {JA0}]					
