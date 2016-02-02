@@ -295,7 +295,7 @@ U 1 1 56713583
 P 7210 3850
 F 0 "Y1" H 7210 4000 50  0000 C CNN
 F 1 "Crystal" H 7210 3700 50  0000 C CNN
-F 2 "Crystals:Crystal_HC48-U_Vertical" H 7210 3850 60  0001 C CNN
+F 2 "Crystals:Crystal_HC49-U_Vertical" H 7210 3850 60  0001 C CNN
 F 3 "" H 7210 3850 60  0000 C CNN
 	1    7210 3850
 	1    0    0    -1  
