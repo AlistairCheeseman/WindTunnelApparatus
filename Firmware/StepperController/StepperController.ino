@@ -64,8 +64,8 @@ void setup() {
   modeX = STEP_HALF; // default to half wave drive
   modeY = STEP_HALF; // default to half wave drive
   // initialise motor states
-  lastHalfStepX = 0B1001; stepStatusX = 0B0011;
-  lastHalfStepY = 0B1001; stepStatusY = 0B0011; 
+  lastHalfStepX = 0B1001; stepStatusX = 0B0001;
+  lastHalfStepY = 0B1001; stepStatusY = 0B0001; 
   // zero the aixs
   Serial.println("ZEROING ALL AXES");
   zero();
@@ -99,7 +99,7 @@ uint8_t fourBitShiftRight(uint8_t val)
 }
 uint8_t fourBitShiftLeft(uint8_t val)
 {
-  return   (((val & 0B0001) << 3) | (val >> 1 )) & 0B1111; // take the right hand digit and insert it on the left.
+  return   ((((val & 0B1) << 3) & 0b1000) | ((val >> 1 ) & 0b0111)) & 0B1111; // take the left hand digit, insert it on the right.
 }
 
 void stepX()
@@ -197,7 +197,11 @@ void loop() {
   // get the total number of revs and steps requested.
 uint16_t revs = (command[4] << 8) | command[5];
 uint8_t steps = command[6];
-  
+uint32_t totalStep = 0;
+   if (modeX == STEP_HALF)
+   totalStep = (revs * 400) + steps; // if half stepping, twice as many steps to a revolution
+   else
+   totalStep = (revs * 200) + steps;
   if (command[0] == 0x1) // motorX
   {
      if (command[3] == 0x1) // LEFT
@@ -214,27 +218,33 @@ uint8_t steps = command[6];
 
     //actually step the motor
      if (command[2] == 0x1) // FAST
-   for ( uint16_t rev = 0; rev <= revs; rev++)
+   for ( uint16_t rev = 0; rev <= totalStep; rev++)
    {
     stepX();
     delayMicroseconds(minDelayTime);
    }
   else if (command[2] == 0x2) // SLOW  
-   for ( uint16_t rev = 0; rev <= revs; rev++)
+   for ( uint16_t rev = 0; rev <= totalStep; rev++)
    {
     stepX();
     delayMicroseconds(maxDelayTime);
    }
-  else if (command[2] == 0x2) // DYNAMIC
+  else if (command[2] == 0x3) // DYNAMIC
   {
-   uint32_t totalStep = (revs * 200) + steps;
    uint16_t currentDelay = maxDelayTime;
-   uint16_t accn = 933.34;
-   uint16_t newdelay = 0;
-   for ( uint16_t rev = 0; rev <= revs; rev++)
+   for ( uint16_t rev = 0; rev <= totalStep; rev++)
    {
-    if (newdelay > 1200)
-      newdelay = 1/(66.66 + (millis() * accn * 1000));
+      if ((rev > totalStep - 600))
+      {
+        if (currentDelay < maxDelayTime)
+            currentDelay = currentDelay + 25;
+      }
+      else if (rev < 300) 
+      {
+        if ((currentDelay - 50) > minDelayTime)
+        currentDelay = currentDelay - 50;
+      }
+    
      stepX();
      delayMicroseconds(currentDelay);
    }
@@ -274,14 +284,15 @@ uint8_t steps = command[6];
    }
   else if (command[2] == 0x2) // DYNAMIC
   {
-   uint32_t totalStep = (revs * 200) + steps;
+   uint32_t totalStep = 0;
+   if (modeY == STEP_HALF)
+   totalStep = (revs * 400) + steps; // if half stepping, twice as many steps to a revolution
+   else
+   totalStep = (revs * 200) + steps;
    uint16_t currentDelay = maxDelayTime;
-   uint16_t accn = 933.34;
    uint16_t newdelay = 0;
-   for ( uint16_t rev = 0; rev <= revs; rev++)
+   for ( uint16_t rev = 0; rev <= totalStep; rev++)
    {
-    if (newdelay > 1200)
-      newdelay = 1/(66.66 + (millis() * accn * 1000));
      stepY();
      delayMicroseconds(currentDelay);
    }
