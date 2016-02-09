@@ -40,7 +40,13 @@ namespace Shell
         static void run()
         {
             UI.Menu MW = new UI.Menu();
+            
+       
+
+            Stepper StepperController = new Stepper("COM3", MW.Dispatcher);
+            StepperController.Connect();
             MW.ShowDialog();
+
         }
     }
     static class consoleHelpers
