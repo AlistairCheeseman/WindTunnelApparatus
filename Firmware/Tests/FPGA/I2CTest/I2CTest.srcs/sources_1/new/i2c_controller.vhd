@@ -51,7 +51,7 @@ end i2c_controller;
 architecture Behavioral of i2c_controller is
 -- state control signals
     type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC);
-    signal state_next, state_reg: state_type := STATE_WAITREADY;
+    signal state_reg: state_type := STATE_WAITREADY;
 -- recd. byte counter
     signal finishFlag :STD_LOGIC;
     signal delay : INTEGER RANGE 0 to 200 := 0;
@@ -65,82 +65,64 @@ begin
 if rising_edge (clk) then
     case state_reg is
         when STATE_WAITREADY =>
+        --reset the timers & counters
+                    delay <= 0;
+                    finishFlag<='0';
+                    -- make sure not enabled
+                    ena <= '0';
             if (busy = '0') then
-                state_next <= STATE_STARTREAD;
+                state_reg <= STATE_STARTREAD;
             end if;
         when STATE_STARTREAD =>
+           -- load the address and start a read
+                 ena <= '1';
+                  rw <= '1';
             if (busy = '1') then
-                state_next <= STATE_WAIT_RX;
+                state_reg <= STATE_WAIT_RX;
             end if;
         when STATE_WAIT_RX =>
             if (busy = '0' and ack_error = '0') then
-                    state_next <= STATE_GETBYTE;
+                    state_reg <= STATE_GETBYTE;
             else
                 if (ack_error = '1') then
-                    state_next <= STATE_WAITREADY;
+                    state_reg <= STATE_WAITREADY;
                 end if;
             end if;
         when STATE_GETBYTE =>
-            state_next <= STATE_WRITEBYTE;
+            FIFO_DataIn <= data_rd;
+            state_reg <= STATE_WRITEBYTE;
         when STATE_WRITEBYTE =>
-            state_next <= STATE_FINISHWRITE;
+         FIFO_WriteEn <= '1';
+            state_reg <= STATE_FINISHWRITE;
         when STATE_FINISHWRITE => 
+           FIFO_WriteEn <= '0';
            if (finishFlag = '1') then
-                state_next <= STATE_SLEEPCHK;
+                state_reg <= STATE_SLEEPCHK;
             else
-                state_next <= STATE_FINISHREAD;
+                state_reg <= STATE_FINISHREAD;
             end if;
         when STATE_FINISHREAD =>
+           
+                 finishFlag <= '1';
             if (busy ='1') then
-                state_next <= STATE_WAIT_RX;
+                state_reg <= STATE_WAIT_RX;
             end if;
         when STATE_SLEEPCHK =>
+           ena <= '0';
             if (delay = 200) then 
-                state_next <= STATE_WAITREADY;
+                state_reg <= STATE_WAITREADY;
             else
-                state_next <= STATE_SLEEPINC;
+                state_reg <= STATE_SLEEPINC;
             end if;
         when STATE_SLEEPINC =>
-            state_next <= STATE_SLEEPCHK;
+            delay <= delay + 1; 
+            state_reg <= STATE_SLEEPCHK;
         when others =>
-            state_next <= STATE_WAITREADY;
+            state_reg <= STATE_WAITREADY;
     end case;
 end if;
-state_reg <= state_next;
 end process;
 
 	
-process(state_reg) -- process to handle the actual state change
-
-begin
-    case state_reg is
-        when STATE_WAITREADY =>
-            --reset the timers & counters
-            delay <= 0;
-            finishFlag<='0';
-            -- make sure not enabled
-            ena <= '0';
-        when STATE_STARTREAD =>
-            -- load the address and start a read
-            ena <= '1';
-             rw <= '1';
-        when STATE_WAIT_RX =>
-        when STATE_GETBYTE =>
-            FIFO_DataIn <= data_rd;
-        when STATE_WRITEBYTE =>
-            FIFO_WriteEn <= '1';
-        when STATE_FINISHWRITE =>
-            FIFO_WriteEn <= '0';
-        when STATE_FINISHREAD =>
-           
-            finishFlag <= '1';
-        when STATE_SLEEPINC =>
-            delay <= delay + 1; 
-        when STATE_SLEEPCHK =>
-         ena <= '0';
-        when others =>
-        --don't do anything, error handle
-    end case;
-end process;
 
 end Behavioral;
