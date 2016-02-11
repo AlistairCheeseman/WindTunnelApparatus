@@ -5,14 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows.Threading;
+using Model;
 
-namespace Shell
+
+namespace ViewModel.SensorControllers
 {
     /// <summary>
     /// This class controls the stepper motor.
     /// it sends the relevant commands to the stepper controller and handles anystuff like that
     /// </summary>
-    public class Stepper
+    public class StepperController
     {
         SerialPort SP;
         Dispatcher dispatcher;
@@ -20,19 +22,22 @@ namespace Shell
         /// Initialise the stepper controller class.
         /// </summary>
         /// <param name="ComPort">we need to know the COM port that the controller is connected to.</param>
-        public Stepper(string ComPort, Dispatcher dis )
+        public StepperController( Dispatcher dis)
         {
-            SP = new SerialPort(ComPort, 9600); //create the serial port
-           
+            //create the serial port
+            SP = new SerialPort();
+            SP.BaudRate = 9600;
+            
             isConnected = false; // set the connection to not connected
             SP.DtrEnable = true; // make the device reset on connect.
             dispatcher = dis; // assign the worker process
         }
 
-        public void Connect()
+        public void Connect(string ComPort)
         {
             try
             {
+                SP.PortName = ComPort;
                 SP.Open();
                 // let some data gather before we add the event handler
                 System.Threading.Tasks.Task.Delay(5000);
@@ -45,18 +50,25 @@ namespace Shell
                 isConnected = false;
             }
         }
-        
+
+        public void Disconnect()
+        {
+            SP.DataReceived -= SP_DataReceived;
+            SP.Close();
+            SP = null;
+            isConnected = false;
+        }
         public bool isConnected
-        { get; set; }
+        { get; set; } = false;
         // is a command being executed?
         public bool isBusy { get; set; }
 
-       
+
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             byte[] buffer = new byte[265];
             ((SerialPort)sender).Read(buffer, 0, ((SerialPort)sender).BytesToRead);
-          
+
             this.dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, buffer);
         }
         public delegate void MyDelegate(byte[] inData);
@@ -64,7 +76,7 @@ namespace Shell
         public void ProcessData(byte[] inData)
         {
             // this routine has to sort the data into new lines.
-           foreach (byte t in inData)
+            foreach (byte t in inData)
             {
                 if (t != 0)
                 {
@@ -75,7 +87,7 @@ namespace Shell
                     }
                 }
             }
-         }
+        }
 
         public void processStatusMessage()
         {
@@ -107,7 +119,7 @@ namespace Shell
             {
                 isBusy = false; // we are not busy anymore.
 
-                sendCommand(MotorAxis.x, MotorDirection.left, MotorSpeed.fast, MotorStep.wave, 50, 10);
+                sendCommand(MotorAxis.x, MotorDirection.left, MotorSpeed.fast, MotorStep.wave, 50, 10, 5);
 
             }
             command = string.Empty;
@@ -125,18 +137,8 @@ namespace Shell
             command[6] = 0x01;
             command[7] = (byte)'\r';
             command[8] = (byte)'\n';
-             SP.Write(command, 0, 9);
+            SP.Write(command, 0, 9);
         }
 
     }
-    public enum MotorDirection { none, left, right}
-    public enum MotorSpeed { none, slow, fast, dynamic}
-    public enum MotorAxis { none, x,y}
-    public enum MotorStep { none, wave, half, full}
-
 }
-
-
-/*
-           
-*/

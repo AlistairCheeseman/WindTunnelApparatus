@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ViewModel;
 
 namespace UI
 {
@@ -19,9 +20,19 @@ namespace UI
     /// </summary>
     public partial class Menu : Window
     {
-        public Menu()
+        public Menu( ref MenuViewModel viewModel)
         {
             InitializeComponent();
+            this.DataContext = viewModel;
+        }
+
+        private void PressureDisconnect_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).DisconnectPressure();
+        }
+        private void PressureConnect_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).ConnectPressure();
         }
     }
 }
