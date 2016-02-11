@@ -99,17 +99,17 @@
                 <TextBlock Grid.Row="10" Text="Pressure 10" />
 
 
-                <TextBlock Grid.Column="1" Grid.Row="0" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="1" Text="1Pa" />
-                <TextBlock Grid.Column="1" Grid.Row="2" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="3" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="4" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="5" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="6" Text="N/A" />
-                <TextBlock Grid.Column="1" Grid.Row="7" Text="0Pa" />
-                <TextBlock Grid.Column="1" Grid.Row="8" Text="0Pa" />
-                <TextBlock Grid.Column="1" Grid.Row="9" Text="1Pa" />
-                <TextBlock Grid.Column="1" Grid.Row="10" Text="300Pa" />
+                <TextBlock Grid.Column="1" Grid.Row="0" />
+                <TextBlock Grid.Column="1" Grid.Row="1" />
+                <TextBlock Grid.Column="1" Grid.Row="2" />
+                <TextBlock Grid.Column="1" Grid.Row="3" />
+                <TextBlock Grid.Column="1" Grid.Row="4" />
+                <TextBlock Grid.Column="1" Grid.Row="5" />
+                <TextBlock Grid.Column="1" Grid.Row="6" />
+                <TextBlock Grid.Column="1" Grid.Row="7" />
+                <TextBlock Grid.Column="1" Grid.Row="8" />
+                <TextBlock Grid.Column="1" Grid.Row="9" />
+                <TextBlock Grid.Column="1" Grid.Row="10" />
             </Grid>
         </GroupBox>
         <GroupBox x:Name="groupBox1" Header="Capture Settings" HorizontalAlignment="Left" Height="160" Margin="246,86,0,0" VerticalAlignment="Top" Width="233">
