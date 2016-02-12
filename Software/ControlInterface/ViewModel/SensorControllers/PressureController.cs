@@ -77,11 +77,12 @@ namespace ViewModel.SensorControllers
         public void ProcessData(byte[] inData)
         {
             string newData = String.Empty;
+            newData = BitConverter.ToString(inData);
             // this routine has to sort the data into new lines.
             foreach (byte t in inData)
             {
-                int val = t;
-                newData += val.ToString();
+              //  int val = t;
+               // newData += val.ToString();
                 if ( FS != null)
                     FS.WriteByte(t);
             }
