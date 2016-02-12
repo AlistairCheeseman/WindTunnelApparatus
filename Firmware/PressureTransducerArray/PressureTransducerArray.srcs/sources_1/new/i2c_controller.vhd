@@ -44,16 +44,17 @@ entity i2c_controller is
    rw        : out STD_LOGIC;                    --'0' is write, '1' is read
    busy      : in STD_LOGIC;                    --indicates transaction in progress
    data_rd   : in STD_LOGIC_VECTOR(7 DOWNTO 0); --data read from slave
-   ack_error : in STD_LOGIC       --flag if improper acknowledge from slave
+   ack_error : in STD_LOGIC;       --flag if improper acknowledge from slave
+   delimeter : in STD_LOGIC_VECTOR(7 downto 0) -- delimeter character
    );             
 end i2c_controller;
 
 architecture Behavioral of i2c_controller is
 -- state control signals
-    type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC);
+    type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC, STATE_HEADERWRITE);
     signal state_reg: state_type := STATE_WAITREADY;
 -- recd. byte counter
-    signal finishFlag :STD_LOGIC;
+    signal ByteCount :INTEGER RANGE 0 to 3 := 0;
     signal delay : INTEGER RANGE 0 to 200 := 0;
 begin
 
@@ -67,7 +68,7 @@ if rising_edge (clk) then
         when STATE_WAITREADY =>
         --reset the timers & counters
                     delay <= 0;
-                    finishFlag<='0';
+                    ByteCount<= 0;
                     -- make sure not enabled
                     ena <= '0';
             if (busy = '0') then
@@ -92,21 +93,25 @@ if rising_edge (clk) then
             FIFO_DataIn <= data_rd;
             state_reg <= STATE_WRITEBYTE;
         when STATE_WRITEBYTE =>
-         FIFO_WriteEn <= '1';
+            FIFO_WriteEn <= '1';
+            ByteCount <= ByteCount + 1;
             state_reg <= STATE_FINISHWRITE;
         when STATE_FINISHWRITE => 
-           FIFO_WriteEn <= '0';
-           if (finishFlag = '1') then
+            FIFO_WriteEn <= '0';
+            if (ByteCount = 2) then
+                state_reg <= STATE_HEADERWRITE;
+            elsif (ByteCount = 3) then 
                 state_reg <= STATE_SLEEPCHK;
             else
                 state_reg <= STATE_FINISHREAD;
             end if;
         when STATE_FINISHREAD =>
-           
-                 finishFlag <= '1';
             if (busy ='1') then
                 state_reg <= STATE_WAIT_RX;
             end if;
+        when STATE_HEADERWRITE =>
+            FIFO_DataIn <= delimeter;
+            state_reg <= STATE_WRITEBYTE;
         when STATE_SLEEPCHK =>
            ena <= '0';
             if (delay = 200) then 

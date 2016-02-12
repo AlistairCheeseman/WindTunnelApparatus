@@ -55,8 +55,11 @@ signal resetin, reset, reset_n: std_logic;
 signal txd, ready, send: std_logic;
 signal serialData: std_logic_vector (7 downto 0);
 -- FIFO Signals serial loader to FIFO signals
-signal FIFO_Empty, FIFO_Full, FIFO_ReadEn, FIFO_WriteEn: std_logic;
-signal FIFO_DataOut, FIFO_DataIn: std_logic_vector (7 downto 0);
+signal Serial_FIFO_Empty, Serial_FIFO_Full, Serial_FIFO_ReadEn, Serial_FIFO_WriteEn: std_logic;
+signal Serial_FIFO_DataOut, Serial_FIFO_DataIn: std_logic_vector (7 downto 0);
+-- I2C Signals I2C loader to FIFO signals
+signal I2C_FIFO_Empty, I2C_FIFO_Full, I2C_FIFO_ReadEn, I2C_FIFO_WriteEn: std_logic;
+signal I2C_FIFO_DataOut, I2C_FIFO_DataIn: std_logic_vector (7 downto 0);
 -- i2c internal signals
 signal sda,scl :std_logic;
 -- i2c control signal
@@ -64,6 +67,9 @@ signal ena,rw,busy,ack_error : std_logic;
 signal addr     : std_logic_vector (6 downto 0);
 signal data_rd  : std_logic_vector (7 downto 0);
 signal  data_wr : std_logic_vector (7 downto 0):= "00000000";
+
+signal delimeter : std_logic_vector (7 downto 0):= "00000000";
+
 begin
 
 
@@ -96,35 +102,61 @@ serialLoader_unit: entity work.serialLoader(Behavioral)
     S_DataOut       =>  serialData,
     S_Ready         =>  ready,
     --FIFO DATA
-    FIFO_Empty      =>  FIFO_Empty,
-    FIFO_Data       =>  FIFO_DataOut, 
-    FIFO_ReadEn     =>  FIFO_ReadEn
+    FIFO_Empty      =>  Serial_FIFO_Empty,
+    FIFO_Data       =>  Serial_FIFO_DataOut, 
+    FIFO_ReadEn     =>  Serial_FIFO_ReadEn
     );
 serialFIFObuffer_unit: entity work.STD_FIFO(Behavioral)
     port map (
     CLK		=> clk,
     RST     => reset,
-    WriteEn => FIFO_WriteEn,
-    DataIn  => FIFO_DataIn,
-    ReadEn  => FIFO_ReadEn,
-    DataOut => FIFO_DataOut,
-    Empty   => FIFO_Empty,
-    Full    => FIFO_Full
+    WriteEn => Serial_FIFO_WriteEn,
+    DataIn  => Serial_FIFO_DataIn,
+    ReadEn  => Serial_FIFO_ReadEn,
+    DataOut => Serial_FIFO_DataOut,
+    Empty   => Serial_FIFO_Empty,
+    Full    => Serial_FIFO_Full
      );
+     
+     
+DataSequencer_unit: entity work.DataSequencer(Behavioral)
+    port map (
+    clk => clk,
+    reset => reset,
+    S_FIFO_WriteEn => Serial_FIFO_WriteEn,
+    S_FIFO_DataIn => Serial_FIFO_DataIn,
+    S_FIFO_Full => Serial_FIFO_Full,
+    I2C_FIFO_ReadEn => I2C_FIFO_ReadEn,
+    I2C_FIFO_DataOut => I2C_FIFO_DataOut,
+    I2C_FIFO_Empty => I2C_FIFO_Empty
+    );
+    
+I2CFIFOBuffer_unit: entity work.STD_FIFO(Behavioral)
+    port map (
+        CLK		=> clk,
+    RST     => reset,
+    WriteEn => I2C_FIFO_WriteEn,
+    DataIn  => I2C_FIFO_DataIn,
+    ReadEn  => I2C_FIFO_ReadEn,
+    DataOut => I2C_FIFO_DataOut,
+    Empty   => I2C_FIFO_Empty,
+    Full    => I2C_FIFO_Full
+    );    
 i2cControl_unit: entity work.i2c_controller(Behavioral)
    port map (
         clk => clk,
         reset_n => reset_n,
-        FIFO_WriteEn => FIFO_WriteEn,
-        FIFO_DataIn => FIFO_DataIn,
-        FIFO_Full => FIFO_Full,
+        FIFO_WriteEn => I2C_FIFO_WriteEn,
+        FIFO_DataIn => I2C_FIFO_DataIn,
+        FIFO_Full => I2C_FIFO_Full,
         
         ena  => ena,
         addr =>  addr,
         rw   =>  rw,
         busy =>  busy,  
         data_rd => data_rd,
-        ack_error => ack_error
+        ack_error => ack_error,
+        delimeter => delimeter
         );  
 i2ccomms_unit: entity work.i2c_master(logic) 
             port map (
