@@ -16,7 +16,7 @@ namespace ViewModel.SensorControllers
         private const decimal m = 0.1496398871M;
         SerialPort SP;
         Dispatcher dispatcher;
-        System.IO.FileStream FS;
+        System.IO.FileStream FS = null;
         bool isConnected
         {
             get; set;
@@ -35,9 +35,8 @@ namespace ViewModel.SensorControllers
             {
                 SP.PortName = ComPort;
                 SP.Open();
-                FS = System.IO.File.OpenWrite("PressureLog");
+                FS = System.IO.File.OpenWrite("PressureLog" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"));
                 // let some data gather before we add the event handler
-                System.Threading.Tasks.Task.Delay(5000);
                 SP.DataReceived += SP_DataReceived; // create the data receive trigger
                 if (SP.IsOpen == true)
                     isConnected = true;
@@ -52,18 +51,20 @@ namespace ViewModel.SensorControllers
         }
         public void Disconnect()
         {
-            FS.Close();
+           
             SP.DataReceived -= SP_DataReceived;
             SP.Close();
-            SP = null;
             isConnected = false;
-           
+            FS.Close();
+            FS = null;
         }
 
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte[] buffer = new byte[999]; // a big buffer as we can receive a lot of data.
-            ((SerialPort)sender).Read(buffer, 0, ((SerialPort)sender).BytesToRead);
+            int byteCount = ((SerialPort)sender).BytesToRead;
+
+            byte[] buffer = new byte[byteCount]; // a big buffer as we can receive a lot of data.
+            ((SerialPort)sender).Read(buffer, 0, byteCount);
 
             this.dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, buffer);
         }
@@ -81,7 +82,8 @@ namespace ViewModel.SensorControllers
             {
                 int val = t;
                 newData += val.ToString();
-                FS.WriteByte(t);
+                if ( FS != null)
+                    FS.WriteByte(t);
             }
             Console.Write(newData);
         }
