@@ -45,7 +45,7 @@ entity DataSequencer is
 end DataSequencer;
 
 architecture Behavioral of DataSequencer is
-  type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE);
+  type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE,STATE_CLOCKIN);
   signal state_reg: state_type := STATE_WAIT;
 begin
 
@@ -70,9 +70,11 @@ else
                 I2C_FIFO_ReadEn <= '1';
                 state_reg <= STATE_ENDREAD;
             when STATE_ENDREAD =>
-                    --clock the data out
-                S_FIFO_DataIn <= I2C_FIFO_DataOut;
                 I2C_FIFO_ReadEn <= '0';
+                state_reg <= STATE_CLOCKIN;
+            when STATE_CLOCKIN =>
+                --clock the data out
+                S_FIFO_DataIn <= I2C_FIFO_DataOut;
                 if ('0' = S_FIFO_Full) then 
                     state_reg <= STATE_STARTWRITE;
                 else

@@ -48,7 +48,7 @@ entity serialLoader is
 end serialLoader;
 
 architecture Behavioral of serialLoader is
-    type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_STARTWRITE, STATE_ENDWRITE);
+    type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_STARTWRITE, STATE_ENDWRITE, STATE_CLOCKIN);
     signal state_reg: state_type := STATE_WAIT;
     
 begin
@@ -73,10 +73,13 @@ else
                 -- request the data
                 FIFO_ReadEn <= '1';
                 state_reg <= STATE_ENDREAD;
+
             when STATE_ENDREAD =>
-                    --clock the data out
-                S_DataOut <= FIFO_Data;
                 FIFO_ReadEn <= '0';
+                state_reg <= STATE_CLOCKIN;
+            when STATE_CLOCKIN =>
+                --clock the data out
+                S_DataOut <= FIFO_Data;
                 state_reg <= STATE_STARTWRITE;
             when STATE_STARTWRITE =>
                     -- tell the serial module to pickup the data
@@ -85,11 +88,11 @@ else
             when STATE_ENDWRITE =>
                 -- close all the modules down
                 S_Send <= '0';
-                if (FIFO_Empty = '0' and S_Ready = '1') then
-                    state_reg <= STATE_STARTREAD;
-                else
+                --if (FIFO_Empty = '0' and S_Ready = '1') then
+                --    state_reg <= STATE_STARTREAD;
+                --else
                     state_reg <= STATE_WAIT;
-                end if;
+                --end if;
             when others =>
                 state_reg <= STATE_WAIT;
         end case;
