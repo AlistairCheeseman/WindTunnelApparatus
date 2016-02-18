@@ -55,7 +55,7 @@ architecture Behavioral of i2c_controller is
     signal state_reg: state_type := STATE_WAITREADY;
 -- recd. byte counter
     signal ByteCount :INTEGER RANGE 0 to 3 := 0;
-    signal delay : INTEGER RANGE 0 to 200 := 0;
+    signal delay : INTEGER RANGE 0 to 100000 := 0;
 begin
 
 
@@ -114,7 +114,7 @@ if rising_edge (clk) then
             state_reg <= STATE_WRITEBYTE;
         when STATE_SLEEPCHK =>
            ena <= '0';
-            if (delay = 200) then 
+            if (delay = 100000) then 
                 state_reg <= STATE_WAITREADY;
             else
                 state_reg <= STATE_SLEEPINC;
