@@ -147,7 +147,6 @@ void stopMotorY()
   digitalWrite(YM4, LOW);
 }
 void loop() {
-  Serial.println("OK READY");
   byte command[COMMAND_LENGTH];
   // initialise to zero
   for (uint8_t val = 0; val <= (COMMAND_LENGTH - 1); val ++)
