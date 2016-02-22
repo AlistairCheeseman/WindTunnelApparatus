@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows.Threading;
 using Model;
+using System.ComponentModel;
 
 
 namespace ViewModel.SensorControllers
@@ -18,19 +19,42 @@ namespace ViewModel.SensorControllers
     {
         SerialPort SP;
         Dispatcher dispatcher;
+        BackgroundWorker BgWorker = new BackgroundWorker();
         /// <summary>
         /// Initialise the stepper controller class.
         /// </summary>
         /// <param name="ComPort">we need to know the COM port that the controller is connected to.</param>
-        public StepperController( Dispatcher dis)
+        public StepperController(Dispatcher dis)
         {
             //create the serial port
             SP = new SerialPort();
             SP.BaudRate = 9600;
-            
+
             isConnected = false; // set the connection to not connected
             SP.DtrEnable = true; // make the device reset on connect.
             dispatcher = dis; // assign the worker process
+
+            BgWorker.DoWork += BgWorker_DoWork;
+        }
+
+        private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string thisCommand = string.Empty;
+            while (commands.Count() > 0)
+            {
+                byte[] inData = commands.Dequeue();
+                // this routine has to sort the data into new lines.
+                foreach (byte t in inData)
+                {
+                    Console.Write((char)t);
+                        thisCommand += ((char)t).ToString();
+                        if (((char)t).ToString() == "\n")
+                        {
+                            processCommand(thisCommand);
+                            thisCommand = String.Empty;
+                        }
+                }
+            }
         }
 
         public void Connect(string ComPort)
@@ -55,7 +79,6 @@ namespace ViewModel.SensorControllers
         {
             SP.DataReceived -= SP_DataReceived;
             SP.Close();
-            SP = null;
             isConnected = false;
         }
         public bool isConnected
@@ -63,81 +86,58 @@ namespace ViewModel.SensorControllers
         // is a command being executed?
         public bool isBusy { get; set; }
 
-
+        Queue<byte[]> commands = new Queue<byte[]>(); // fifo buffer.
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte[] buffer = new byte[265];
-            ((SerialPort)sender).Read(buffer, 0, ((SerialPort)sender).BytesToRead);
-
-            this.dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, buffer);
+            int ByteCount = ((SerialPort)sender).BytesToRead;
+            byte[] buffer = new byte[ByteCount];
+            ((SerialPort)sender).Read(buffer, 0, ByteCount);
+            commands.Enqueue(buffer);
+            if (BgWorker.IsBusy == false)
+                BgWorker.RunWorkerAsync(); // if the background worker has finished, give it a kick to start up again.
         }
-        public delegate void MyDelegate(byte[] inData);
-        string command = string.Empty;
-        public void ProcessData(byte[] inData)
-        {
-            // this routine has to sort the data into new lines.
-            foreach (byte t in inData)
-            {
-                if (t != 0)
-                {
-                    command += ((char)t).ToString();
-                    if (((char)t).ToString() == "\n")
-                    {
-                        processStatusMessage();
-                    }
-                }
-            }
-        }
+        
 
-        public void processStatusMessage()
+        
+
+
+
+        public void processCommand(string command)
         {
-            Console.WriteLine(command);
-            if (command == "HELLO, PLEASE ENTER CONFIG SETTINGS: MINDELAY (=1) MAXDELAY (=10)\r\n")
+            Console.WriteLine("Command Processing: " + command);
+            if (command == "STEPPER V1. ENTER CONFIG\r\n")
             {
-                SP.WriteLine("2500 65535"); // give the max speed delay and the min speed delay
+                SP.Write("3.5 65\r\n"); // give the max speed delay and the min speed delay
             }
-            else if (command == "OK WAIT\r\n" || command == "ZEROING ALL AXES\r\n")
+            else if (command == "ZEROING ALL AXES\r\n")
             {
 
             }
-            else if (command == "OK READY\r\n")
-            { // it is ready send the first command, we will start with a simple movement to the center.
-                byte[] command = new byte[9];
-                command[0] = 0x01; // x axis motor
-                command[1] = 0x01; // half step
-                command[2] = 0x03;// FAST
-                command[3] = 0x02; //left turn
-                command[4] = 0x00;
-                command[5] = 0x64; // rotate 100 times.
-                command[6] = 0x00;
-                command[7] = (byte)'\r';
-                command[8] = (byte)'\n';
-                SP.Write(command, 0, 9);
-                isBusy = true;
+            else if (command == "OK WAIT\r\n")
+            {
+                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
             }
             else if (command == "OK DONE\r\n")
             {
                 isBusy = false; // we are not busy anymore.
-
-                sendCommand(MotorAxis.x, MotorDirection.left, MotorSpeed.fast, MotorStep.wave, 50, 10, 5);
-
             }
-            command = string.Empty;
         }
 
-        public void sendCommand(MotorAxis xy, MotorDirection dir, MotorSpeed speed, MotorStep step, int rotations, int steps, int holdTime)
+        public void sendCommand(MotorAxis xy, MotorStep stepMode, MotorSpeed speed, MotorDirection dir, ushort rotations, byte steps, byte holdTime)
         {
-            byte[] command = new byte[9];
-            command[0] = byte.Parse(Convert.ToInt32(xy).ToString()); // x axis motor
-            command[1] = 0x01; // half step
-            command[2] = 0x03;// FAST
-            command[3] = 0x2; //left turn
-            command[4] = 0x00;
-            command[5] = 0x0F;
-            command[6] = 0x01;
-            command[7] = (byte)'\r';
-            command[8] = (byte)'\n';
-            SP.Write(command, 0, 9);
+            byte[] command = new byte[10];
+            command[0] = byte.Parse(Convert.ToInt32(xy).ToString()); // MOTOR
+            command[1] = byte.Parse(Convert.ToInt32(stepMode).ToString()); // STEPMODE
+            command[2] = byte.Parse(Convert.ToInt32(speed).ToString());// SPEED
+            command[3] = byte.Parse(Convert.ToInt32(dir).ToString()); // DIRECTION
+            command[4] = (byte)((rotations & (ushort)0xFF00) >> 8); //MSByte of rotation count
+            command[5] = (byte)(rotations & (ushort)0x00FF); // LSByte of rotation count
+            command[6] = steps; // number of steps
+            command[7] = holdTime; // how long to hold after the command.
+            command[8] = (byte)'\r';
+            command[9] = (byte)'\n';
+            SP.Write(command, 0, 10);
+            isBusy = true;
         }
 
     }
