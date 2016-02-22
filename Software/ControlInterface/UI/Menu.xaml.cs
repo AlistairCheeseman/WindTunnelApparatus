@@ -26,13 +26,45 @@ namespace UI
             this.DataContext = viewModel;
         }
 
-        private void PressureDisconnect_Click(object sender, RoutedEventArgs e)
+  
+        private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            ((MenuViewModel)this.DataContext).DisconnectPressure();
+            if (!((MenuViewModel)this.DataContext).PressureController.isConnected)
+            {
+                ((MenuViewModel)this.DataContext).ConnectPressure();
+            }
+            else
+            {
+                ((MenuViewModel)this.DataContext).DisconnectPressure();
+            }
+           
         }
-        private void PressureConnect_Click(object sender, RoutedEventArgs e)
+        private void StepperConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            ((MenuViewModel)this.DataContext).ConnectPressure();
+            if (!((MenuViewModel)this.DataContext).StepperController.isConnected)
+            {
+                ((MenuViewModel)this.DataContext).ConnectStepper();
+            }
+            else
+            {
+                ((MenuViewModel)this.DataContext).DisconnectStepper();
+            }
+        }
+        private void HotWireConnectDisconnect_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void HotWireExport_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void PressureExport_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void StepLeft_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).StepLeft();
         }
     }
 }

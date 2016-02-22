@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ViewModel.SensorControllers;
+using Model;
 
 namespace ViewModel
 {
@@ -19,13 +20,15 @@ namespace ViewModel
         {
             //initialise raw values
             PressureCom = "COM9";
+            StepperCom = "COM13";
+            HotWireCom = "COM14";
         }
         // worker process
        private Dispatcher dispatcher;
 
         //controllers
-        PressureController PressureController = null;
-        StepperController StepperController = null;
+     public   PressureController PressureController = null;
+      public  StepperController StepperController = null;
 
         public void AssignDispatcher(Dispatcher dispatcher)
         {
@@ -45,7 +48,7 @@ namespace ViewModel
         }
         public void ConnectStepper()
         {
-            StepperController.Connect("COM1");
+            StepperController.Connect(StepperCom);
         }
         public void DisconnectStepper()
         {
@@ -63,6 +66,50 @@ namespace ViewModel
             {
                 _PressureCom = value;
             }
+        }
+        private string _StepperCom;
+        public string StepperCom
+        {
+            get
+            {
+                return _StepperCom;
+            }
+            set
+            {
+                _StepperCom = value;
+            }
+        }
+        private string _HotWireCom;
+        public string HotWireCom
+        {
+            get
+            {
+                return _HotWireCom;
+            }
+            set
+            {
+                _HotWireCom = value;
+            }
+        }
+        public void StepLeft()
+        {
+            if (StepperController.isBusy == false)
+                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.dynamic, MotorDirection.left, 6, 0, 0);
+        }
+        public void StepRight()
+        {
+            if (StepperController.isBusy == false)
+                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.dynamic, MotorDirection.right, 6, 0, 0);
+        }
+        public void StepUp()
+        {
+            if (StepperController.isBusy == false)
+                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.dynamic, MotorDirection.left, 6, 0, 0);
+        }
+        public void StepDown()
+        {
+            if (StepperController.isBusy == false)
+                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.dynamic, MotorDirection.right, 6, 0, 0);
         }
     }
 
