@@ -107,7 +107,7 @@ namespace ViewModel.SensorControllers
             Console.WriteLine("Command Processing: " + command);
             if (command == "STEPPER V1. ENTER CONFIG\r\n")
             {
-                SP.Write("3.5 65\r\n"); // give the max speed delay and the min speed delay
+                SP.Write("2 65\r\n"); // give the max speed delay and the min speed delay
             }
             else if (command == "ZEROING ALL AXES\r\n")
             {
