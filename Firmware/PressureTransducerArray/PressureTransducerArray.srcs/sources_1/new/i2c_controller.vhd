@@ -106,6 +106,9 @@ if rising_edge (clk) then
                 state_reg <= STATE_FINISHREAD;
             end if;
         when STATE_FINISHREAD =>
+            if (ByteCount = 1) then
+                ena<='0';
+            end if;
             if (busy ='1') then
                 state_reg <= STATE_WAIT_RX;
             end if;
@@ -113,7 +116,7 @@ if rising_edge (clk) then
             FIFO_DataIn <= delimeter;
             state_reg <= STATE_WRITEBYTE;
         when STATE_SLEEPCHK =>
-           ena <= '0';
+           ena <= '0'; -- this might not be needed anymore.
             if (delay = 100000) then 
                 state_reg <= STATE_WAITREADY;
             else
