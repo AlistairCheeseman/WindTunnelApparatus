@@ -20,13 +20,13 @@ namespace UI
     /// </summary>
     public partial class Menu : Window
     {
-        public Menu( ref MenuViewModel viewModel)
+        public Menu(ref MenuViewModel viewModel)
         {
             InitializeComponent();
             this.DataContext = viewModel;
         }
 
-  
+
         private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
             if (!((MenuViewModel)this.DataContext).PressureController.isConnected)
@@ -37,7 +37,7 @@ namespace UI
             {
                 ((MenuViewModel)this.DataContext).DisconnectPressure();
             }
-           
+
         }
         private void StepperConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
@@ -60,11 +60,20 @@ namespace UI
         }
         private void PressureExport_Click(object sender, RoutedEventArgs e)
         {
-
+            Microsoft.Win32.SaveFileDialog SFD = new Microsoft.Win32.SaveFileDialog();
+            SFD.FileName = "Export";
+            SFD.DefaultExt = ".csv";
+            SFD.Filter = "Comma Separated Values (.csv)|*.csv";
+            SFD.ShowDialog();
+            ((MenuViewModel)this.DataContext).ExportPressure(SFD.FileName);
         }
         private void StepLeft_Click(object sender, RoutedEventArgs e)
         {
             ((MenuViewModel)this.DataContext).StepLeft();
+        }
+        private void StepRight_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).StepRight();
         }
     }
 }
