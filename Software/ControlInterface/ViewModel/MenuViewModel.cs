@@ -20,7 +20,7 @@ namespace ViewModel
         {
             //initialise raw values
             PressureCom = "COM9";
-            StepperCom = "COM13";
+            StepperCom = "COM6";
             HotWireCom = "COM14";
         }
         // worker process
@@ -94,12 +94,12 @@ namespace ViewModel
         public void StepLeft()
         {
             if (StepperController.isBusy == false)
-                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.dynamic, MotorDirection.left, 6, 0, 0);
+                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepRight()
         {
             if (StepperController.isBusy == false)
-                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.dynamic, MotorDirection.right, 6, 0, 0);
+                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         public void StepUp()
         {
@@ -110,6 +110,11 @@ namespace ViewModel
         {
             if (StepperController.isBusy == false)
                 StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.dynamic, MotorDirection.right, 6, 0, 0);
+        }
+
+        public void ExportPressure(string FilePath)
+        {
+            PressureController.ExportNiceData(FilePath);
         }
     }
 
