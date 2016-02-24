@@ -54,7 +54,7 @@ architecture Behavioral of i2c_controller is
     type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC, STATE_HEADERWRITE);
     signal state_reg: state_type := STATE_WAITREADY;
 -- recd. byte counter
-    signal ByteCount :INTEGER RANGE 0 to 3 := 0;
+    signal ByteCount :INTEGER RANGE 0 to 5 := 0;
     signal delay : INTEGER RANGE 0 to 100000 := 0;
 begin
 
@@ -98,15 +98,15 @@ if rising_edge (clk) then
             state_reg <= STATE_FINISHWRITE;
         when STATE_FINISHWRITE => 
             FIFO_WriteEn <= '0';
-            if (ByteCount = 2) then
+            if (ByteCount = 4) then
                 state_reg <= STATE_HEADERWRITE;
-            elsif (ByteCount = 3) then 
+            elsif (ByteCount = 5) then 
                 state_reg <= STATE_SLEEPCHK;
             else
                 state_reg <= STATE_FINISHREAD;
             end if;
         when STATE_FINISHREAD =>
-            if (ByteCount = 1) then
+            if (ByteCount = 3) then
                 ena<='0';
             end if;
             if (busy ='1') then
