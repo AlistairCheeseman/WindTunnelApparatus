@@ -45,16 +45,17 @@ entity i2c_controller is
    busy      : in STD_LOGIC;                    --indicates transaction in progress
    data_rd   : in STD_LOGIC_VECTOR(7 DOWNTO 0); --data read from slave
    ack_error : in STD_LOGIC;       --flag if improper acknowledge from slave
+   sensorId : in STD_LOGIC_VECTOR(7 downto 0);
    delimeter : in STD_LOGIC_VECTOR(7 downto 0) -- delimeter character
    );             
 end i2c_controller;
 
 architecture Behavioral of i2c_controller is
 -- state control signals
-    type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC, STATE_HEADERWRITE);
+    type state_type is (STATE_WAITREADY, STATE_STARTREAD, STATE_WAIT_RX, STATE_GETBYTE, STATE_WRITEBYTE, STATE_FINISHWRITE, STATE_FINISHREAD, STATE_SLEEPCHK, STATE_SLEEPINC, STATE_HEADERWRITE, STATE_HEADERIDWRITE);
     signal state_reg: state_type := STATE_WAITREADY;
 -- recd. byte counter
-    signal ByteCount :INTEGER RANGE 0 to 5 := 0;
+    signal ByteCount :INTEGER RANGE 0 to 7 := 0;
     signal delay : INTEGER RANGE 0 to 100000 := 0;
 begin
 
@@ -99,8 +100,10 @@ if rising_edge (clk) then
         when STATE_FINISHWRITE => 
             FIFO_WriteEn <= '0';
             if (ByteCount = 4) then
-                state_reg <= STATE_HEADERWRITE;
+                state_reg <=STATE_HEADERIDWRITE ;
             elsif (ByteCount = 5) then 
+                state_reg <= STATE_HEADERWRITE;
+            elsif (ByteCount = 6) then 
                 state_reg <= STATE_SLEEPCHK;
             else
                 state_reg <= STATE_FINISHREAD;
@@ -114,6 +117,9 @@ if rising_edge (clk) then
             end if;
         when STATE_HEADERWRITE =>
             FIFO_DataIn <= delimeter;
+            state_reg <= STATE_WRITEBYTE;
+        when STATE_HEADERIDWRITE =>
+            FIFO_DataIn <= sensorId;
             state_reg <= STATE_WRITEBYTE;
         when STATE_SLEEPCHK =>
            ena <= '0'; -- this might not be needed anymore.

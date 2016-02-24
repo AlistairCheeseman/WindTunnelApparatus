@@ -70,6 +70,8 @@ signal  data_wr : std_logic_vector (7 downto 0):= "00000000";
 
 signal delimeter : std_logic_vector (7 downto 0):= "00000000";
 
+
+signal sensor1 : std_logic_vector (7 downto 0) := "00000001";
 begin
 
 
@@ -156,6 +158,7 @@ i2cControl_unit: entity work.i2c_controller(Behavioral)
         busy =>  busy,  
         data_rd => data_rd,
         ack_error => ack_error,
+        sensorId => sensor1,
         delimeter => delimeter
         );  
 i2ccomms_unit: entity work.i2c_master(logic) 
