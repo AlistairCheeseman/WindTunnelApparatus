@@ -40,8 +40,6 @@ entity i2c_controller is
    FIFO_DataIn: out std_logic_vector ( 7 downto 0);
    FIFO_Full : in STD_LOGIC;
    ena : out STD_LOGIC := '0'; --latch in command
-   addr   : out STD_LOGIC_VECTOR(6 DOWNTO 0):= "0101000"; --address of target slave
-   rw        : out STD_LOGIC;                    --'0' is write, '1' is read
    busy      : in STD_LOGIC;                    --indicates transaction in progress
    data_rd   : in STD_LOGIC_VECTOR(7 DOWNTO 0); --data read from slave
    ack_error : in STD_LOGIC;       --flag if improper acknowledge from slave
@@ -78,7 +76,6 @@ if rising_edge (clk) then
         when STATE_STARTREAD =>
            -- load the address and start a read
                  ena <= '1';
-                  rw <= '1';
             if (busy = '1') then
                 state_reg <= STATE_WAIT_RX;
             end if;

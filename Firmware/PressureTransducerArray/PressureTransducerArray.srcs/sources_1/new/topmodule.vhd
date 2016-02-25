@@ -57,21 +57,23 @@ signal serialData: std_logic_vector (7 downto 0);
 -- FIFO Signals serial loader to FIFO signals
 signal Serial_FIFO_Empty, Serial_FIFO_Full, Serial_FIFO_ReadEn, Serial_FIFO_WriteEn: std_logic;
 signal Serial_FIFO_DataOut, Serial_FIFO_DataIn: std_logic_vector (7 downto 0);
+
+--SENSORS:
+-- Global stuff
+constant I2C_RW           : std_logic := '1'; -- we will always be reading so we can set this constant
+constant I2C_DELIMETER    : std_logic_vector (7 downto 0):= "00000000"; -- the byte that will be between each reading.
+constant I2C_ADDR         : std_logic_vector (6 downto 0):= "0101000";  -- the address of the 
+--SENSOR1:
+constant I2C1_Id : std_Logic_vector (7 downto 0) := "00000001"; -- id for this sensor
 -- I2C Signals I2C loader to FIFO signals
-signal I2C_FIFO_Empty, I2C_FIFO_Full, I2C_FIFO_ReadEn, I2C_FIFO_WriteEn: std_logic;
-signal I2C_FIFO_DataOut, I2C_FIFO_DataIn: std_logic_vector (7 downto 0);
--- i2c internal signals
-signal sda,scl :std_logic;
--- i2c control signal
-signal ena,rw,busy,ack_error : std_logic;
-signal addr     : std_logic_vector (6 downto 0);
-signal data_rd  : std_logic_vector (7 downto 0);
-signal  data_wr : std_logic_vector (7 downto 0):= "00000000";
-
-signal delimeter : std_logic_vector (7 downto 0):= "00000000";
+signal I2C1_FIFO_Empty, I2C1_FIFO_Full, I2C1_FIFO_ReadEn, I2C1_FIFO_WriteEn: std_logic;
+signal I2C1_FIFO_DataOut, I2C1_FIFO_DataIn: std_logic_vector (7 downto 0);
+-- I2C control signals
+signal I2C1_ENA,I2C1_RW,I2C1_BUSY,I2C1_ACK_ERROR : std_logic;
+signal I2C1_DATA_RD  : std_logic_vector (7 downto 0);
+signal I2C1_DATA_WR : std_logic_vector (7 downto 0):= "00000000";
 
 
-signal sensor1 : std_logic_vector (7 downto 0) := "00000001";
 begin
 
 
@@ -128,53 +130,49 @@ DataSequencer_unit: entity work.DataSequencer(Behavioral)
     S_FIFO_WriteEn => Serial_FIFO_WriteEn,
     S_FIFO_DataIn => Serial_FIFO_DataIn,
     S_FIFO_Full => Serial_FIFO_Full,
-    I2C_FIFO_ReadEn => I2C_FIFO_ReadEn,
-    I2C_FIFO_DataOut => I2C_FIFO_DataOut,
-    I2C_FIFO_Empty => I2C_FIFO_Empty
+    I2C_FIFO_ReadEn => I2C1_FIFO_ReadEn,
+    I2C_FIFO_DataOut => I2C1_FIFO_DataOut,
+    I2C_FIFO_Empty => I2C1_FIFO_Empty
     );
-    
-I2CFIFOBuffer_unit: entity work.STD_FIFO(Behavioral)
+-- LOGIC FOR SENSORS:
+--SENSOR1:    
+I2C1_FIFOBuffer_unit: entity work.STD_FIFO(Behavioral)
     port map (
         CLK		=> clk,
-    RST     => reset,
-    WriteEn => I2C_FIFO_WriteEn,
-    DataIn  => I2C_FIFO_DataIn,
-    ReadEn  => I2C_FIFO_ReadEn,
-    DataOut => I2C_FIFO_DataOut,
-    Empty   => I2C_FIFO_Empty,
-    Full    => I2C_FIFO_Full
+        RST     => reset,
+        WriteEn => I2C1_FIFO_WriteEn,
+        DataIn  => I2C1_FIFO_DataIn,
+        ReadEn  => I2C1_FIFO_ReadEn,
+        DataOut => I2C1_FIFO_DataOut,
+        Empty   => I2C1_FIFO_Empty,
+        Full    => I2C1_FIFO_Full
     );    
-i2cControl_unit: entity work.i2c_controller(Behavioral)
+I2C1_Control_unit: entity work.i2c_controller(Behavioral)
    port map (
-        clk => clk,
-        reset_n => reset_n,
-        FIFO_WriteEn => I2C_FIFO_WriteEn,
-        FIFO_DataIn => I2C_FIFO_DataIn,
-        FIFO_Full => I2C_FIFO_Full,
-        
-        ena  => ena,
-        addr =>  addr,
-        rw   =>  rw,
-        busy =>  busy,  
-        data_rd => data_rd,
-        ack_error => ack_error,
-        sensorId => sensor1,
-        delimeter => delimeter
+        clk =>              clk,
+        reset_n =>          reset_n,
+        FIFO_WriteEn =>     I2C1_FIFO_WriteEn,
+        FIFO_DataIn =>      I2C1_FIFO_DataIn,
+        FIFO_Full =>        I2C1_FIFO_Full,
+        ena  =>             I2C1_ENA,
+        busy =>             I2C1_BUSY,  
+        data_rd =>          I2C1_DATA_RD,
+        ack_error =>        I2C1_ACK_ERROR,
+        sensorId =>         I2C1_Id,
+        delimeter =>        I2C_DELIMETER
         );  
-i2ccomms_unit: entity work.i2c_master(logic) 
+I2C1_Comms_unit: entity work.i2c_master(logic) 
             port map (
-            clk         => clk,
-            reset_n   => reset_n,
-            ena      => ena,
-            addr     => addr,
-            rw       => rw,
-            data_wr   => data_wr,
-            busy      => busy,
-            data_rd   => data_rd,
-            ack_error => ack_error,
-            sda  => JA1,-- sda,
-            scl  => JA0 --scl
+            clk         =>  clk,
+            reset_n     =>  reset_n,
+            ena         =>  I2C1_ENA,
+            addr        =>  I2C_ADDR,
+            rw          =>  I2C_RW,
+            data_wr     =>  I2C1_DATA_WR,
+            busy        =>  I2C1_BUSY,
+            data_rd     =>  I2C1_DATA_RD,
+            ack_error   =>  I2C1_ACK_ERROR,
+            sda  =>         JA4,-- sda,
+            scl  =>         JA0 --scl
            );
-           JA2 <= ack_error;
-           JA3 <= ena;
 end Behavioral;
