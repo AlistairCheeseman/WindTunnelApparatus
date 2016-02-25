@@ -38,10 +38,8 @@ end SimALL;
 architecture Behavioral of SimALL is
 constant Clk_period : time := 10ns;
 signal clk  : STD_LOGIC; 
-signal JA0 : STD_LOGIC; 
-signal JA1 : STD_LOGIC;
-signal JA2 : STD_LOGIC;
-signal JA3  : STD_LOGIC;
+signal SDA1 : STD_LOGIC; 
+signal SCL1 : STD_LOGIC;
 signal RsTx : STD_LOGIC;
 signal btnCpuReset : STD_LOGIC := '1';
 begin
@@ -50,10 +48,8 @@ UUT: entity work.topmodule(Behavioral)
     port map (
         clk         => clk,
         btnCpuReset => btnCpuReset,
-       JA0 => JA0,
-         JA1 => JA1,
-           JA2 => JA2,
-             JA3 => JA3,
+        SDA1 => SDA1,
+        SCL1 => SCL1,
         RsTx => RsTx
   );
 
@@ -69,17 +65,17 @@ UUT: entity work.topmodule(Behavioral)
 -- random reset program
     reset_process : process
     begin 
-        JA1 <= 'H';
+        SDA1 <= 'H';
         btnCpuReset <= '0';
         wait for Clk_period * 200;
         btnCpuReset <= '1';
         wait for Clk_period * 2550;
-        JA1 <= '0';
+        SDA1 <= '0';
         wait for Clk_period * 249;
-        JA1 <= 'H';
+        SDA1 <= 'H';
         wait for Clk_period * 999;
         wait for Clk_period * 999;
         wait;
         end process;
-JA0 <= 'H';
+SCL1 <= 'H';
 end Behavioral;
