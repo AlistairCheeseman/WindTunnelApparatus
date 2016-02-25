@@ -35,10 +35,8 @@ entity topmodule is
 Port ( 
 clk       : IN     STD_LOGIC; 
 
-JA0       : INOUT  STD_LOGIC;
-JA1       : INOUT  STD_LOGIC;
-JA2       : OUT  STD_LOGIC;
-JA3       : OUT  STD_LOGIC;
+SCL1       : INOUT  STD_LOGIC;
+SDA1       : INOUT  STD_LOGIC;
 --RsRx : IN STD_LOGIC;
 RsTx : OUT STD_LOGIC;
 --RsCts : 
@@ -172,7 +170,7 @@ I2C1_Comms_unit: entity work.i2c_master(logic)
             busy        =>  I2C1_BUSY,
             data_rd     =>  I2C1_DATA_RD,
             ack_error   =>  I2C1_ACK_ERROR,
-            sda  =>         JA4,-- sda,
-            scl  =>         JA0 --scl
+            sda  =>         SDA1,-- sda,
+            scl  =>         SCL1 --scl
            );
 end Behavioral;
