@@ -14,7 +14,7 @@ namespace ViewModel.SensorControllers
         SerialPort SP;
         Dispatcher dispatcher;
         System.IO.FileStream FS = null;
-      List<PressureData> OutputData = new List<PressureData>();
+        List<PressureData> OutputData = new List<PressureData>();
 
 
         public bool isConnected
@@ -68,159 +68,144 @@ namespace ViewModel.SensorControllers
             this.dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, buffer);
         }
         public delegate void MyDelegate(byte[] inData);
-        short prevDataCount = 0;
-        byte[] prevData = new byte[2]; // variable to hold any fragments of a broken transmission
-        public long ReadingCount = 0;
+        int prevDataCount = 0;
+        byte[] prevData = new byte[5]; // variable to hold any fragments of a broken transmission
+        long ReadingCount = 0;
         /// <summary>
         ///  receive data burst.
         /// </summary>
         /// <param name="inData"></param>
         public void ProcessData(byte[] inData)
         {
-            //string newData = String.Empty;
-            //newData = BitConverter.ToString(inData);
-            //Console.Write(newData);
-            // this routine has to sort the data into new lines.
-            int byteCount = inData.Length;
-            int t = 0;
-            ushort val = 0; // variable to hold the recovered data segment.
-
-            if (byteCount == 0)
-            { return; // if no data.
-            }
-            //in case we have a tiny packet.
-            if ( byteCount < 3)
-            {
-                // if not enough data left, then put what we have in the prevDataVariable.
-                if (byteCount == 2)
-                {
-                    prevData[2] = inData[t + 1];
-                    prevData[1] = inData[t];
-                    prevDataCount = 2;
-                }
-                else if (byteCount == 1)
-                {
-                    prevData[1] = inData[t];
-                    prevDataCount = 1;
-                }
-                return;
-            }
-            // need to align the data loader algorithm.
-
-            // need to check for each scenario for where the delimeter is.
-            if (inData[t + 2] == 0x00) //the value of t is the beginning of a data payload. -- perfect arrangement.
-            {
-                // don't do anything, we are already aligned correctly.
-            }
-            else if (inData[t + 1] == 0x00)
-            {
-                if (prevDataCount == 1)
-                {
-                    byte[] newData = new byte[byteCount + prevDataCount];
-                    newData[0] = prevData[0];
-                    for (int index = 0; index <= (byteCount - 1); index++)
-                    {
-                        newData[index + prevDataCount] = inData[index];
-                    }
-                    inData = newData;
-                    byteCount = inData.Length;
-                    prevDataCount = 0;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("UNRECOVERABLE MALFORMED PACKET!! {0}", prevDataCount);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    t = t + 2;// skip over the error.
-                    //clear out old data.
-                    prevDataCount = 0;
-                    prevData[0] = 0x00;
-                    prevData[1] = 0x00;
-                }
-            }
-            else if (inData[t] == 0x00)
-            {
-                if (prevDataCount == 2)
-                {
-                    byte[] newData = new byte[byteCount + prevDataCount];
-                    newData[0] = prevData[0];
-                    newData[1] = prevData[1];
-                    for (int index = 0; index <= (byteCount - 1); index++)
-                    {
-                        newData[index + prevDataCount] = inData[index];
-                    }
-                    inData = newData;
-                    byteCount = inData.Length;
-                    prevDataCount = 0;
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("UNRECOVERABLE MALFORMED PACKET!! {0}", prevDataCount);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    t = t + 1; // skip over the malformed packet.
-                    //clear out old data.
-                    prevDataCount = 0;
-                    prevData[0] = 0x00;
-                    prevData[1] = 0x00;
-                }
-            }
-
-
-            while ((t + 2) <= (byteCount -1))
-            {
-                int byte1 = t;
-                int byte2 = t + 1;
-                val = (ushort)(((inData[byte1] & 0x3F) << 8) | inData[byte2]); // get the actual data and remove any error codes.
-                t = t + 3;
-            }
-            if (t != byteCount) // check if there is any partial data left. the normal exit condition is t == byteCount and t pionts to next dataset.
-            {
-                if (t > byteCount) // there is overshoot. this is an unrecoverable error, whole payload could be bad.
-                {
-                    Console.WriteLine("TOOMUCH");
-                }
-                // if not enough data left, then put what we have in the prevDataVariable.
-                if ((byteCount - 1) == t + 1)
-                {
-                    prevData[1] = inData[t + 1];
-                    prevData[0] = inData[t];
-                    prevDataCount = 2;
-                }
-                else if (byteCount -1 ==  t)
-                {
-                    prevData[0] = inData[t];
-                    prevDataCount = 1;
-                }
-            }
-            else
-            {
-                prevDataCount = 0;
-            }
-
-
-            decimal cmH2o = ((val - 1638.0M) / 655.35M) - 10M;
-            decimal Pa = cmH2o * 98.0665M;
-            Console.WriteLine("Pressure Reading: {0:##.##} Pa", Pa);
-            ReadingCount++;
-            OutputData.Add(new PressureData(ReadingCount, Pa));
-
             // write the raw data
             for (int outputByteCount = 0; outputByteCount <= inData.Count() - 1; outputByteCount++)
             {
                 if (FS != null) // check the raw file is open before attempting to write to it.
                     FS.WriteByte(inData[outputByteCount]); // write the raw data
             }
+            // Dataformat - P1 P2 T1 T2 S1 00
+            // this routine has to sort the data into new lines.
+            int byteCount = inData.Length;
+
+            if (byteCount == 0)
+                return; // if no data.
+            //in case we have a tiny packet that it isn't possible to assemble with previous data.
+            if ((byteCount + prevDataCount) < 6)
+            {
+                // if not enough data left, then put what we have in the prevDataVariable.
+                for (int c = 0; c < byteCount; c++) // for each byte.
+                {
+                    prevData[prevDataCount + c] = inData[c];
+                    prevDataCount++;
+                }
+                return;
+            }
+            // need to align the data loader algorithm, find the delimeter and maybe append the previous data is applicable.
+            for (int q = 0; q < 6; q++)
+            {
+                if (inData[q] == 0x00)
+                { // the delimeter is found, q holds the 0 based location of the delimeter!
+                    if (q == 5)
+                    {
+                        // perfect alignment, don't do anything.
+                        break;
+                    }
+                    else
+                    {
+                        if (q + prevDataCount != 5) // can we assemble the packet ok?
+                        { // we don't have the right amount of data to assemble it
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("UNRECOVERABLE MALFORMED PACKET!! {0}", prevDataCount);
+                            Console.ForegroundColor = ConsoleColor.White;
+                            prevDataCount = 0; // purge stale data.
+                            prevData = new byte[5];
+                        }
+                        else
+                        {
+                            // we have the right data to be able to assemble the packet!
+                            // insert the new data to the beginning of the array and update the count.
+                            byte[] newData = new byte[byteCount + prevDataCount];
+                            for (int p = 0; p < prevDataCount; p++)
+                            {
+                                newData[p] = prevData[p];
+                            }
+                            for (int index = 0; index < byteCount; index++)
+                                newData[index + prevDataCount] = inData[index];
+                            inData = newData;
+                            byteCount = inData.Length;
+                            prevDataCount = 0;
+                            prevData = new byte[5];
+                        }
+                    }
+                }
+            }
+
+
+            int t = 0;
+            // actually process data.
+            while ((t + 5) <= (byteCount - 1))
+            {
+                int byte1 = t;      // pressure 1
+                int byte2 = t + 1;  // pressure 2
+                int byte3 = t + 2;  // temperature 1
+                int byte4 = t + 3;  // temperature 2
+                int byte5 = t + 4;  // sensor Id
+                int byte6 = t + 5;
+                ushort rawPressure = (ushort)(((inData[byte1] & 0x3F) << 8) | inData[byte2]); // get the actual data and remove any error codes.
+                ushort rawTemperature = (ushort)(((inData[byte3]) << 8) | inData[byte4] & 0xE0); // get the temperature data, make sure there isn't any extra crap.
+                ushort SensorId = (ushort)(inData[byte5]); // get the sensor Id.
+                ushort ErrorCode = (ushort)(inData[byte1] & 0xC0); // get the error code.
+
+
+                decimal cmH2o = ((rawPressure - 1638.0M) / 655.35M) - 10M;
+                decimal Pa = cmH2o * 98.0665M;
+                Console.WriteLine("{0}-{1}-{2}-{3}-{4}-{5}", inData[byte1], inData[byte2], inData[byte3], inData[byte4], inData[byte5], inData[byte6]);
+                if (inData[byte6] != 0x00)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("LOST DATA SYNC!!");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                ReadingCount++;
+                OutputData.Add(new PressureData(ReadingCount, Pa, rawTemperature, ErrorCode));
+                t = t + 6;
+            }
+
+            if (t != byteCount) // check if there is any partial data left. the normal exit condition is t == byteCount and t pionts to next dataset.
+            {
+                if (t > byteCount) // there is overshoot. this is an unrecoverable error, whole payload could be bad.
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("TOOMUCH");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                else
+                {
+                    // if not enough data left, then put what we have in the prevDataVariable.
+                    int partialCount = byteCount - t;
+
+                    for (int p = 0; p < partialCount; p++)
+                    {
+                        prevData[p] = inData[t + p];
+
+                    }
+                    prevDataCount = partialCount;
+                }
+            }
+            else
+            {
+                prevDataCount = 0;
+            }
         }
 
         public void ExportNiceData(string FilePath)
         {
-            IOrderedEnumerable<PressureData> ExportList = OutputData.OrderBy(x => x.x); // export ordered Data.
+            IOrderedEnumerable<PressureData> ExportList = OutputData.OrderBy(x => x.moment); // export ordered Data.
             StringBuilder SB = new StringBuilder();
-            SB.Append("id, Value(Pa)\r\n");
-            foreach ( PressureData data in ExportList)
+            SB.Append("id, Value(Pa), Temperature\r\n");
+            foreach (PressureData data in ExportList)
             {
-                SB.AppendFormat("{0}, {1}\r\n", data.x, data.y);
+                SB.AppendFormat("{0}, {1}, {2}\r\n", data.moment, data.Pressure, data.Temperature);
             }
             System.IO.File.WriteAllText(FilePath, SB.ToString());
         }

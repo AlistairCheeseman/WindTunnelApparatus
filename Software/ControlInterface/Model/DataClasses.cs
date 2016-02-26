@@ -23,13 +23,17 @@ namespace Model
     /* Pressure Data container */
     public class PressureData
     {
-        public PressureData(double X, decimal Y)
+        public PressureData(long moment, decimal Pressure, decimal Temperature, ushort ErrorCode)
         {
-            this.x = X;
-            this.y = Y;
+            this.moment = moment;
+            this.Pressure = Pressure;
+            this.Temperature = Temperature;
+            this.ErrorCode = ErrorCode;
         }
-        public double x { get; set; }
-        public decimal y { get; set; }
+        public long moment { get; set; }
+        public decimal Pressure { get; set; }
+        public decimal Temperature { get; set; }
+        public int ErrorCode { get; set; }
     }
 
 
