@@ -56,12 +56,17 @@ namespace UI
         }
         private void HotWireExport_Click(object sender, RoutedEventArgs e)
         {
-
+            Microsoft.Win32.SaveFileDialog SFD = new Microsoft.Win32.SaveFileDialog();
+            SFD.FileName = "HotwireExport";
+            SFD.DefaultExt = ".csv";
+            SFD.Filter = "Comma Separated Values (.csv)|*.csv";
+            SFD.ShowDialog();
+            ((MenuViewModel)this.DataContext).ExportHotWire(SFD.FileName);
         }
         private void PressureExport_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog SFD = new Microsoft.Win32.SaveFileDialog();
-            SFD.FileName = "Export";
+            SFD.FileName = "PressureExport";
             SFD.DefaultExt = ".csv";
             SFD.Filter = "Comma Separated Values (.csv)|*.csv";
             SFD.ShowDialog();
@@ -74,6 +79,14 @@ namespace UI
         private void StepRight_Click(object sender, RoutedEventArgs e)
         {
             ((MenuViewModel)this.DataContext).StepRight();
+        }
+        private void StepUp_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).StepUp();
+        }
+        private void StepDown_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).StepDown();
         }
     }
 }
