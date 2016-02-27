@@ -85,12 +85,8 @@ end DataSequencer;
 architecture Behavioral of DataSequencer is
   type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE,STATE_CLOCKIN, STATE_UPDATEMUX);
   signal state_reg: state_type := STATE_WAIT;
-  
-  signal current_FIFO_ReadEn : STD_LOGIC;
-  signal current_FIFO_Empty : STD_LOGIC;
-  signal current_FIFO_DataOut : STD_LOGIC_VECTOR ( 7 downto 0);
-  
-  constant Maxtimeout  : positive := 10000;
+ 
+  constant Maxtimeout  : positive := 100;
   
   signal multiplexerState : INTEGER RANGE 0 to 9 := 0;
   signal timeoutCount     : INTEGER RANGE 0 to Maxtimeout:= 0; -- wait 1ms before a timeout.
@@ -99,15 +95,24 @@ architecture Behavioral of DataSequencer is
   
 begin
 
-process (clk, current_FIFO_Empty, S_FIFO_Full, reset) -- process to handle the next state
+process (clk, S_FIFO_Full, reset) -- process to handle the next state
 begin
 if (reset = '1') then
     --reset state:
-    current_FIFO_ReadEn <= '0';
     S_FIFO_WriteEn <= '0';
     state_reg <= STATE_WAIT;
     multiplexerState <= 0;
     timeoutCount <= 0;
+    I2C1_FIFO_ReadEn <= '0';
+    I2C2_FIFO_ReadEn <= '0';
+    I2C3_FIFO_ReadEn <= '0';
+    I2C4_FIFO_ReadEn <= '0';
+    I2C5_FIFO_ReadEn <= '0';
+    I2C6_FIFO_ReadEn <= '0';
+    I2C7_FIFO_ReadEn <= '0';
+    I2C8_FIFO_ReadEn <= '0';
+    I2C9_FIFO_ReadEn <= '0';
+    I2C10_FIFO_ReadEn <= '0';
 else
     if rising_edge (clk) then
     case state_reg is
@@ -126,26 +131,196 @@ else
                 end if;
                 state_reg <= STATE_WAIT;
             when STATE_WAIT =>
-                    if (current_FIFO_Empty = '1') then
+              case multiplexerState is
+                   when 0 =>
+                       if (I2C1_FIFO_Empty = '1') then
                         timeoutCount <= timeoutCount + 1; -- increase the timeout count.
                         if (timeoutCount = Maxtimeout) then
                             state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
                         else
                             state_reg <= STATE_WAIT; -- else carry on waiting.
                         end if;
-                    else
+                       else
                         state_reg <= STATE_STARTREAD;
-                    end if;
+                       end if;
+                   when 1 =>
+                        if (I2C2_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 2 =>
+                       if (I2C3_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 3 =>
+                       if (I2C4_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 4 =>
+                       if (I2C5_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 5 =>
+                       if (I2C6_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 6 =>
+                       if (I2C7_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 7 =>
+                       if (I2C8_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 8 =>
+                       if (I2C9_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when 9 =>
+                       if (I2C10_FIFO_Empty = '1') then
+                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                        if (timeoutCount = Maxtimeout) then
+                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        else
+                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                        end if;
+                       else
+                        state_reg <= STATE_STARTREAD;
+                       end if;
+                   when others =>        
+               end case;
             when STATE_STARTREAD =>
                 -- request the data
-                current_FIFO_ReadEn <= '1';
+                case (multiplexerState) is
+                    when 0 =>
+                        I2C1_FIFO_ReadEn <= '1';
+                    when 1 =>
+                        I2C2_FIFO_ReadEn <= '1';
+                    when 2 =>
+                        I2C3_FIFO_ReadEn <= '1';
+                    when 3 =>
+                        I2C4_FIFO_ReadEn <= '1';
+                    when 4 =>
+                        I2C5_FIFO_ReadEn <= '1';
+                    when 5 =>
+                        I2C6_FIFO_ReadEn <= '1';
+                    when 6 =>
+                        I2C7_FIFO_ReadEn <= '1';
+                    when 7 =>
+                        I2C8_FIFO_ReadEn <= '1';
+                    when 8 =>
+                        I2C9_FIFO_ReadEn <= '1';
+                    when 9 =>
+                        I2C10_FIFO_ReadEn <= '1';
+                    when others =>
+                end case;
                 state_reg <= STATE_ENDREAD;
             when STATE_ENDREAD =>
-                current_FIFO_ReadEn <= '0';
+            --finish the request
+                case (multiplexerState) is
+                    when 0 =>
+                        I2C1_FIFO_ReadEn <= '0';
+                    when 1 =>
+                        I2C2_FIFO_ReadEn <= '0';
+                    when 2 =>
+                        I2C3_FIFO_ReadEn <= '0';
+                    when 3 =>
+                        I2C4_FIFO_ReadEn <= '0';
+                    when 4 =>
+                        I2C5_FIFO_ReadEn <= '0';
+                    when 5 =>
+                        I2C6_FIFO_ReadEn <= '0';
+                    when 6 =>
+                        I2C7_FIFO_ReadEn <= '0';
+                    when 7 =>
+                        I2C8_FIFO_ReadEn <= '0';
+                    when 8 =>
+                        I2C9_FIFO_ReadEn <= '0';
+                    when 9 =>
+                        I2C10_FIFO_ReadEn <= '0';
+                    when others =>
+                end case;
                 state_reg <= STATE_CLOCKIN;
             when STATE_CLOCKIN =>
                 --clock the data out
-                S_FIFO_DataIn <= current_FIFO_DataOut;
+                case (multiplexerState) is
+                    when 0 =>
+                        S_FIFO_DataIn <= I2C1_FIFO_DataOut;
+                    when 1 =>
+                        S_FIFO_DataIn <= I2C2_FIFO_DataOut;
+                    when 2 =>
+                        S_FIFO_DataIn <= I2C3_FIFO_DataOut;
+                    when 3 =>
+                        S_FIFO_DataIn <= I2C4_FIFO_DataOut;
+                    when 4 =>
+                        S_FIFO_DataIn <= I2C5_FIFO_DataOut;
+                    when 5 =>
+                        S_FIFO_DataIn <= I2C6_FIFO_DataOut;
+                    when 6 =>
+                        S_FIFO_DataIn <= I2C7_FIFO_DataOut;
+                    when 7 =>
+                        S_FIFO_DataIn <= I2C8_FIFO_DataOut;
+                    when 8 =>
+                        S_FIFO_DataIn <= I2C9_FIFO_DataOut;
+                    when 9 =>
+                        S_FIFO_DataIn <= I2C10_FIFO_DataOut;
+                    when others =>
+                end case;
                 if ('0' = S_FIFO_Full) then 
                     state_reg <= STATE_STARTWRITE;
                 else
@@ -168,67 +343,6 @@ else
     end case;
     end if;
 end if;    
-end process;
-
-
--- select the correct signal according to the multiplexer value.
-process (multiplexerState, 
-I2C1_FIFO_Empty, I2C1_FIFO_DataOut,
-I2C2_FIFO_Empty, I2C2_FIFO_DataOut,
-I2C3_FIFO_Empty, I2C3_FIFO_DataOut,
-I2C4_FIFO_Empty, I2C4_FIFO_DataOut,
-I2C5_FIFO_Empty, I2C5_FIFO_DataOut,
-I2C6_FIFO_Empty, I2C6_FIFO_DataOut,
-I2C7_FIFO_Empty, I2C7_FIFO_DataOut,
-I2C8_FIFO_Empty, I2C8_FIFO_DataOut,
-I2C9_FIFO_Empty, I2C9_FIFO_DataOut,
-I2C10_FIFO_Empty, I2C10_FIFO_DataOut,
-current_FIFO_ReadEn
-) is
-begin    
-    case multiplexerState is
-        when 0 =>
-            I2C1_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C1_FIFO_Empty;
-            current_FIFO_DataOut <= I2C1_FIFO_DataOut;
-        when 1 =>
-            I2C2_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C2_FIFO_Empty;
-            current_FIFO_DataOut <= I2C2_FIFO_DataOut;
-        when 2 =>
-            I2C3_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C3_FIFO_Empty;
-            current_FIFO_DataOut <= I2C3_FIFO_DataOut;
-        when 3 =>
-            I2C4_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C4_FIFO_Empty;
-            current_FIFO_DataOut <= I2C4_FIFO_DataOut;
-        when 4 =>
-            I2C5_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C5_FIFO_Empty;
-            current_FIFO_DataOut <= I2C5_FIFO_DataOut;
-        when 5 =>
-            I2C6_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C6_FIFO_Empty;
-            current_FIFO_DataOut <= I2C6_FIFO_DataOut;
-        when 6 =>
-            I2C7_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C7_FIFO_Empty;
-            current_FIFO_DataOut <= I2C7_FIFO_DataOut;
-        when 7 =>
-            I2C8_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C8_FIFO_Empty;
-            current_FIFO_DataOut <= I2C8_FIFO_DataOut;
-        when 8 =>
-            I2C9_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C9_FIFO_Empty;
-            current_FIFO_DataOut <= I2C9_FIFO_DataOut;
-        when 9 =>
-            I2C10_FIFO_ReadEn <= current_FIFO_ReadEn;
-            current_FIFO_Empty <= I2C10_FIFO_Empty;
-            current_FIFO_DataOut <= I2C10_FIFO_DataOut;
-        when others =>        
-    end case;
 end process;
 
 
