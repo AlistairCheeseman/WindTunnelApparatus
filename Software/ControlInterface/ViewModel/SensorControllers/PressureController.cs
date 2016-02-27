@@ -6,28 +6,163 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows.Threading;
 using Model;
+using ViewModel.Helpers;
 
 namespace ViewModel.SensorControllers
 {
-    public class PressureController
+    public class PressureController : ViewModelBase
     {
         SerialPort SP;
-        Dispatcher dispatcher;
         System.IO.FileStream FS = null;
+        #region Data container + helpers
         List<PressureData> OutputData = new List<PressureData>();
+        public decimal CurrentSensor1Reading
+        {
+            get
+            {
+                if (OutputData.Where(x=>x.sensorId ==1).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 1).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor2Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 2).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 2).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor3Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 3).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 3).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor4Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 4).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 4).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor5Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 5).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 5).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor6Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 6).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 6).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor7Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 7).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 7).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor8Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 8).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 8).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor9Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 9).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 9).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        public decimal CurrentSensor10Reading
+        {
+            get
+            {
+                if (OutputData.Where(x => x.sensorId == 10).Count() > 0)
+                    return OutputData.Where(x => x.sensorId == 10).OrderByDescending(x => x.moment).First().Pressure;
+                else
+                    return 0M;
+            }
+        }
+        #endregion
 
+        Dispatcher dispatcher;
 
+        #region Connection Information
+        private ConnectionState _ConnectionState = ConnectionState.Disconnected;
+        public ConnectionState ConnectionState
+        {
+            get
+            {
+                return _ConnectionState;
+            }
+            set
+            {
+                this.SetField(ref _ConnectionState, value, () => ConnectionState);
+            }
+        }
+        private bool _isConnected = false;
         public bool isConnected
         {
-            get; set;
-        } = false;
-        public PressureController(Dispatcher dis)
+            get
+            {
+                return _isConnected;
+            }
+            set
+            {
+                if (value == true)
+                {
+                    ConnectionState &= ~ConnectionState.Disconnected;
+                    ConnectionState = ConnectionState | ConnectionState.Connected; // add the connected status.
+                }
+                else
+                    ConnectionState = ConnectionState.Disconnected; // set the enum to this state solely.
+                this.SetField(ref _isConnected, value, () => isConnected);
+            }
+        }
+        #endregion
+        public PressureController()
         {
             SP = new SerialPort();
             SP.BaudRate = 2000000;
 
             isConnected = false;
-            dispatcher = dis;
+        }
+        public void setDispatcher(Dispatcher dis)
+        {
+            this.dispatcher = dis;
         }
         public void Connect(string ComPort)
         {
@@ -64,7 +199,10 @@ namespace ViewModel.SensorControllers
 
             byte[] buffer = new byte[byteCount]; // a big buffer as we can receive a lot of data.
             ((SerialPort)sender).Read(buffer, 0, byteCount);
-
+          //  foreach (byte b in buffer)
+          //  {
+          //      Console.Write(b.ToString("X") + "-");
+          //  }
             this.dispatcher.BeginInvoke(new MyDelegate(ProcessData), DispatcherPriority.Normal, buffer);
         }
         public delegate void MyDelegate(byte[] inData);
@@ -115,10 +253,20 @@ namespace ViewModel.SensorControllers
                         if (q + prevDataCount != 5) // can we assemble the packet ok?
                         { // we don't have the right amount of data to assemble it
                             Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("UNRECOVERABLE MALFORMED PACKET!! {0}", prevDataCount);
+                            Console.WriteLine("UNRECOVERABLE MALFORMED PACKET!! {0} {1}", prevDataCount, q);
                             Console.ForegroundColor = ConsoleColor.White;
                             prevDataCount = 0; // purge stale data.
-                            prevData = new byte[5];
+                            prevData = new byte[5]; // purge stale data.
+                            //make sure the rest of the data has good alignment.
+                            byte[] newData = new byte[byteCount - (q+1)];
+                            for (int p = (q+1); p < byteCount; p++)
+                            {
+                                newData[p - (q +1)] = inData[p];
+                                Console.WriteLine("{0} {1}", p - (q + 1), p);
+                            }
+                            inData = newData;
+                            byteCount = inData.Length;
+                            q = 10; // force the loop to exit.
                         }
                         else
                         {
@@ -164,10 +312,11 @@ namespace ViewModel.SensorControllers
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("LOST DATA SYNC!!");
                     Console.ForegroundColor = ConsoleColor.White;
+                    return; // break the loop.
                 }
                 ReadingCount++;
                 Console.WriteLine("Sensor: {0}, Pa: {1}, Temp: {2}, Status: {3}", SensorId, Pa, rawTemperature, ErrorCode);
-                OutputData.Add(new PressureData(ReadingCount, Pa, rawTemperature, ErrorCode));
+                OutputData.Add(new PressureData(ReadingCount, Pa, rawTemperature, ErrorCode, SensorId));
                 t = t + 6;
             }
 
@@ -196,6 +345,19 @@ namespace ViewModel.SensorControllers
             {
                 prevDataCount = 0;
             }
+
+
+            // trigger a sensor status update.
+            this.OnPropertyChanged("CurrentSensor1Reading");
+            this.OnPropertyChanged("CurrentSensor2Reading");
+            this.OnPropertyChanged("CurrentSensor3Reading");
+            this.OnPropertyChanged("CurrentSensor4Reading");
+            this.OnPropertyChanged("CurrentSensor5Reading");
+            this.OnPropertyChanged("CurrentSensor6Reading");
+            this.OnPropertyChanged("CurrentSensor7Reading");
+            this.OnPropertyChanged("CurrentSensor8Reading");
+            this.OnPropertyChanged("CurrentSensor9Reading");
+            this.OnPropertyChanged("CurrentSensor10Reading");
         }
 
         public void ExportNiceData(string FilePath)
