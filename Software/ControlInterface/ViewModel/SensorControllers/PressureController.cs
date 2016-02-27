@@ -159,7 +159,6 @@ namespace ViewModel.SensorControllers
 
                 decimal cmH2o = ((rawPressure - 1638.0M) / 655.35M) - 10M;
                 decimal Pa = cmH2o * 98.0665M;
-                Console.WriteLine("{0}-{1}-{2}-{3}-{4}-{5}", inData[byte1], inData[byte2], inData[byte3], inData[byte4], inData[byte5], inData[byte6]);
                 if (inData[byte6] != 0x00)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -167,6 +166,7 @@ namespace ViewModel.SensorControllers
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 ReadingCount++;
+                Console.WriteLine("Sensor: {0}, Pa: {1}, Temp: {2}, Status: {3}", SensorId, Pa, rawTemperature, ErrorCode);
                 OutputData.Add(new PressureData(ReadingCount, Pa, rawTemperature, ErrorCode));
                 t = t + 6;
             }
