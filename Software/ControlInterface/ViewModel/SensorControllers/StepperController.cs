@@ -7,7 +7,7 @@ using System.IO.Ports;
 using System.Windows.Threading;
 using Model;
 using System.ComponentModel;
-
+using ViewModel.Helpers;
 
 namespace ViewModel.SensorControllers
 {
@@ -15,28 +15,23 @@ namespace ViewModel.SensorControllers
     /// This class controls the stepper motor.
     /// it sends the relevant commands to the stepper controller and handles anystuff like that
     /// </summary>
-    public class StepperController
+    public class StepperController : ViewModelBase
     {
         SerialPort SP;
-        Dispatcher dispatcher;
         BackgroundWorker BgWorker = new BackgroundWorker();
         /// <summary>
         /// Initialise the stepper controller class.
         /// </summary>
         /// <param name="ComPort">we need to know the COM port that the controller is connected to.</param>
-        public StepperController(Dispatcher dis)
+        public StepperController()
         {
             //create the serial port
             SP = new SerialPort();
             SP.BaudRate = 9600;
-
             isConnected = false; // set the connection to not connected
             SP.DtrEnable = true; // make the device reset on connect.
-            dispatcher = dis; // assign the worker process
-
             BgWorker.DoWork += BgWorker_DoWork;
         }
-
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string thisCommand = string.Empty;
@@ -81,10 +76,31 @@ namespace ViewModel.SensorControllers
             SP.Close();
             isConnected = false;
         }
+        private bool _isConnected = false;
         public bool isConnected
-        { get; set; } = false;
+        {
+            get
+            {
+                return _isConnected;
+            }
+            set
+            {
+                this.SetField(ref _isConnected, value, () => isConnected);
+            }
+        }
         // is a command being executed?
-        public bool isBusy { get; set; }
+        private bool _isBusy = false;
+        public bool isBusy
+        {
+            get
+            {
+                return _isBusy;
+            }
+            set
+            {
+                this.SetField(ref _isBusy, value, () => isBusy);
+            }
+        }
 
         Queue<byte[]> commands = new Queue<byte[]>(); // fifo buffer.
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
