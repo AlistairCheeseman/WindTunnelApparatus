@@ -90,9 +90,13 @@ architecture Behavioral of DataSequencer is
   signal current_FIFO_Empty : STD_LOGIC;
   signal current_FIFO_DataOut : STD_LOGIC_VECTOR ( 7 downto 0);
   
+  constant Maxtimeout  : positive := 10000;
+  
   signal multiplexerState : INTEGER RANGE 0 to 9 := 0;
-  signal timeoutCount     : INTEGER RANGE 0 to 20000:= 0; -- wait 1ms before a timeout.
+  signal timeoutCount     : INTEGER RANGE 0 to Maxtimeout:= 0; -- wait 1ms before a timeout.
   signal currentByteCount : INTEGER RANGE 0 to 6:= 0; --6 bytes of data per sensor.
+  
+  
 begin
 
 process (clk, current_FIFO_Empty, S_FIFO_Full, reset) -- process to handle the next state
@@ -124,7 +128,7 @@ else
             when STATE_WAIT =>
                     if (current_FIFO_Empty = '1') then
                         timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = 2000) then
+                        if (timeoutCount = Maxtimeout) then
                             state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
                         else
                             state_reg <= STATE_WAIT; -- else carry on waiting.
