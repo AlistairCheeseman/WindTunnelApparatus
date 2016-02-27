@@ -17,9 +17,10 @@ namespace Model
     public enum MotorAxis { none = 0, x = 1, y = 2 }
     public enum MotorStep { none = 0, wave = 1, half = 2, full = 3 }
 
-    /*ViewModel Connection States */
-    public enum ConnectionState {  none, ConnectedREADY, ConnectedINIT, ConnectedBusy}
-
+    /*ViewModel Connection States  - setting to powers of 2 and settings flags allows multiple values */
+    [Flags]
+    public enum ConnectionState {  none = 1, Connected = 2, Disconnected = 4, INIT = 8, Busy = 16}
+    
     /* Pressure Data container */
     public class PressureData
     {
