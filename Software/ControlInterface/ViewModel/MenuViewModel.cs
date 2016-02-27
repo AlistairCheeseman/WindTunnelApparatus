@@ -7,15 +7,16 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using ViewModel.SensorControllers;
 using Model;
+using ViewModel.Helpers;
 
 namespace ViewModel
 {
     /// <summary>
     ///  this class holds all data needed for the user interface. all user clicks/ presses etc get pushed through to here.
     /// </summary>
-    public class MenuViewModel
+    public class MenuViewModel : ViewModelBase
     {
-
+        #region Startup routines
         public MenuViewModel()
         {
             //initialise raw values
@@ -24,23 +25,22 @@ namespace ViewModel
             HotWireCom = "COM14";
         }
         // worker process
-       private Dispatcher dispatcher;
+        private Dispatcher dispatcher;
 
         //controllers
-     public   PressureController PressureController = null;
-      public  StepperController StepperController = null;
+        public PressureController PressureController { get; } = new PressureController();
+        public StepperController StepperController { get; } = new StepperController();
 
         public void AssignDispatcher(Dispatcher dispatcher)
         {
             this.dispatcher = dispatcher;
-            PressureController = new PressureController(this.dispatcher);
-            StepperController =  new StepperController(this.dispatcher);
+            PressureController.setDispatcher(this.dispatcher);
         }
-        // connect up to the pressure sensor.
+        #endregion
+        #region Connect-DisconnectFunctions
         public void ConnectPressure()
         {
             PressureController.Connect(PressureCom);
-
         }
         public void DisconnectPressure()
         {
@@ -54,7 +54,16 @@ namespace ViewModel
         {
             StepperController.Disconnect();
         }
+        public void ConnectHotWire()
+        {
 
+        }
+        public void DisconnectHotWire()
+        {
+
+        }
+        #endregion
+        #region COM Port settings.
         private string _PressureCom;
         public string PressureCom
         {
@@ -64,7 +73,7 @@ namespace ViewModel
             }
             set
             {
-                _PressureCom = value;
+                this.SetField(ref _PressureCom, value, () => PressureCom);
             }
         }
         private string _StepperCom;
@@ -76,7 +85,7 @@ namespace ViewModel
             }
             set
             {
-                _StepperCom = value;
+                this.SetField(ref _StepperCom, value, () => StepperCom);
             }
         }
         private string _HotWireCom;
@@ -88,9 +97,11 @@ namespace ViewModel
             }
             set
             {
-                _HotWireCom = value;
+                this.SetField(ref _HotWireCom, value, () => HotWireCom);
             }
         }
+        #endregion
+        #region Step Nudge
         public void StepLeft()
         {
             if (StepperController.isBusy == false)
@@ -104,18 +115,24 @@ namespace ViewModel
         public void StepUp()
         {
             if (StepperController.isBusy == false)
-                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.dynamic, MotorDirection.left, 6, 0, 0);
+                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepDown()
         {
             if (StepperController.isBusy == false)
-                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.dynamic, MotorDirection.right, 6, 0, 0);
+                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
-
+        #endregion
+        #region Export
         public void ExportPressure(string FilePath)
         {
             PressureController.ExportNiceData(FilePath);
         }
+        public void ExportHotWire(string FilePath)
+        {
+            
+        }
+        #endregion
     }
 
 
