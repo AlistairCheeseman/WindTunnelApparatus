@@ -1,4 +1,4 @@
-/// This is a cut down version of the Stepper Firmware. 
+/// This is a cut down version of the Stepper Firmware.
 /// It offers ONLY FULL STEPPING but does actually work in both directions
 /// it is mainly being used to test pruposes and to tweak the acceleration logic
 /* stepper motor pins, NOTE ORDER: A1 B1 A2 B2 */
@@ -30,6 +30,7 @@ uint8_t fourBitShiftRight(uint8_t val); // barrel shift right
 uint8_t fourBitShiftLeft(uint8_t val);  // barrel shift left
 void stopMotorX(); // disable output -- stops motor from being active
 void stopMotorY(); // disable output -- stops motor from being active
+uint16_t updateDelay(uint64_t totalStep, uint64_t currentStep, uint16_t currentDelay); // calculate the next delay.
 
 // step program initialises serial connection and Zeroes (no hold) axes.
 void setup() {
@@ -205,18 +206,7 @@ void loop() {
       uint16_t currentDelay = maxDelayTime;
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
-        if ((rev > totalStep - 600))
-        {
-          if (currentDelay < maxDelayTime)
-            currentDelay = currentDelay + 25;
-        }
-        else if (rev < 600)
-        { // accelerate
-          if (currentDelay > minDelayTime)
-            currentDelay = currentDelay - 122;
-          else
-            currentDelay = minDelayTime;
-        }
+        currentDelay = updateDelay(totalStep, currentStep, currentDelay);
         stepX();
         delayMicroseconds(currentDelay);
       }
@@ -252,18 +242,7 @@ void loop() {
       uint16_t currentDelay = maxDelayTime;
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
-        if ((rev > totalStep - 600))
-        {
-          if (currentDelay < maxDelayTime)
-            currentDelay = currentDelay + 25;
-        }
-        else if (rev < 600)
-        { // accelerate
-          if (currentDelay > minDelayTime)
-            currentDelay = currentDelay - 122;
-          else
-            currentDelay = minDelayTime;
-        }
+        currentDelay = updateDelay(totalStep, currentStep, currentDelay);
         stepY();
         delayMicroseconds(currentDelay);
       }
@@ -276,5 +255,23 @@ void loop() {
   }
   free(command);
   Serial.println("OK DONE");
+}
+
+uint16_t updateDelay(uint64_t totalStep, uint64_t currentStep, uint16_t currentDelay)
+{
+  if ((currentStep > totalStep - 600))
+  {
+    if (currentDelay < maxDelayTime)
+      return currentDelay + 25;
+  }
+  else if (currentStep < 600)
+  { // accelerate
+    if (currentDelay > minDelayTime)
+      return currentDelay - 122;
+    else
+      return minDelayTime;
+  }
+  else
+    return currentDelay;
 }
 
