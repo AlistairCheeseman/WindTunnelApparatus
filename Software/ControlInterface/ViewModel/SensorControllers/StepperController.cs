@@ -76,6 +76,20 @@ namespace ViewModel.SensorControllers
             SP.Close();
             isConnected = false;
         }
+
+
+        private ConnectionState _ConnectionState = ConnectionState.Disconnected;
+        public ConnectionState ConnectionState
+        {
+            get
+            {
+                return _ConnectionState;
+            }
+            set
+            {
+                this.SetField(ref _ConnectionState, value, () => ConnectionState);
+            }
+        }
         private bool _isConnected = false;
         public bool isConnected
         {
@@ -85,6 +99,13 @@ namespace ViewModel.SensorControllers
             }
             set
             {
+                if (value == true)
+                {
+                    ConnectionState &= ~ConnectionState.Disconnected;
+                    ConnectionState = ConnectionState | ConnectionState.Connected; // add the connected status.
+                }
+                else
+                    ConnectionState = ConnectionState.Disconnected; // set the enum to this state solely.
                 this.SetField(ref _isConnected, value, () => isConnected);
             }
         }
@@ -98,6 +119,12 @@ namespace ViewModel.SensorControllers
             }
             set
             {
+                if (value == true)
+                {
+                    ConnectionState = ConnectionState | ConnectionState.Busy; // add the connected status.
+                }
+                else
+                    ConnectionState &= ~ConnectionState.Busy;
                 this.SetField(ref _isBusy, value, () => isBusy);
             }
         }
