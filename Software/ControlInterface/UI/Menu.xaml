@@ -11,16 +11,22 @@
             <Grid>
                 <GroupBox Header="Current Position" Margin="108,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <StackPanel >
-                        <TextBlock   Text="x:  0.0mm" />
-                        <TextBlock   Text="y:  0.0mm" />
-                        <TextBlock  Text="r:  0.0deg" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock   Text="x:" />
+                            <TextBlock Text="{Binding StepperController.xPosition}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock   Text="y:" />
+                            <TextBlock Text="{Binding StepperController.yPosition}" />
+                        </StackPanel>
+                        <TextBlock  IsEnabled="False" Text="r:  0.0deg" />
                     </StackPanel>
                 </GroupBox>
                 <Button  Content="&#x25B2;" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepUp_Click"/>
-                <Button  Content="&#x21B6;" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x21B6;" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/>
                 <Button  Content="&#x25C0;" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepLeft_Click"/>
                 <Button  Content="&#x25BC;" HorizontalAlignment="Left" Margin="30,50,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepDown_Click"/>
-                <Button  Content="&#x21B7;" HorizontalAlignment="Left" Margin="50,72,0,0" VerticalAlignment="Top" Width="20" Height="20"/>
+                <Button  Content="&#x21B7;" HorizontalAlignment="Left" Margin="50,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/>
                 <Button  Content="&#x25B6;" HorizontalAlignment="Left" Margin="50,30,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepRight_Click"/>
             </Grid>
         </GroupBox>
@@ -86,42 +92,30 @@
                     <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Hot Wire 1" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWire1Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Hot Wire 2" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWire2Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Hot Wire 3" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWire3Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Hot Wire 4" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWire4Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Hot Wire 5" />
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWire5Reading, StringFormat=\{0:F2\}}" />
 
-                <TextBlock Grid.Row="5" Text="Pressure 1" />
-                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PressureController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="6" Text="Pressure 2"  />
-                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PressureController.CurrentSensor2Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="7" Text="Pressure 3" />
-                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding PressureController.CurrentSensor3Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="8" Text="Pressure 4" />
-                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding PressureController.CurrentSensor4Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="9" Text="Pressure 5" />
-                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding PressureController.CurrentSensor5Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="10" Text="Pressure 6" />
-                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding PressureController.CurrentSensor6Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="11" Text="Pressure 7" />
-                <TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding PressureController.CurrentSensor7Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="12" Text="Pressure 8" />
-                <TextBlock Grid.Row="12" Grid.Column="1" Text="{Binding PressureController.CurrentSensor8Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="13" Text="Pressure 9" />
-                <TextBlock Grid.Row="13" Grid.Column="1" Text="{Binding PressureController.CurrentSensor9Reading, StringFormat=\{0:F2\}}" />
-                <TextBlock Grid.Row="14" Text="Pressure 10" />
-                <TextBlock Grid.Row="14" Grid.Column="1" Text="{Binding PressureController.CurrentSensor10Reading, StringFormat=\{0:F2\}}" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Hot Wire" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWireReading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="1" Text="Pressure 1" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PressureController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="2" Text="Pressure 2"  />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PressureController.CurrentSensor2Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="3" Text="Pressure 3" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding PressureController.CurrentSensor3Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="4" Text="Pressure 4" />
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PressureController.CurrentSensor4Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="5" Text="Pressure 5" />
+                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PressureController.CurrentSensor5Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="6" Text="Pressure 6" />
+                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PressureController.CurrentSensor6Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="7" Text="Pressure 7" />
+                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding PressureController.CurrentSensor7Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="8" Text="Pressure 8" />
+                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding PressureController.CurrentSensor8Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="9" Text="Pressure 9" />
+                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding PressureController.CurrentSensor9Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="10" Text="Pressure 10" />
+                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding PressureController.CurrentSensor10Reading, StringFormat=\{0:F2\}}" />
 
 
             </Grid>
