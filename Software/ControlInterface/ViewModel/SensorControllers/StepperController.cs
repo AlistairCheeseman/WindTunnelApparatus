@@ -128,7 +128,32 @@ namespace ViewModel.SensorControllers
                 this.SetField(ref _isBusy, value, () => isBusy);
             }
         }
-
+        #region position information
+        private decimal _xPosition = 0;
+        public decimal xPosition
+        {
+            get
+            {
+                return _xPosition;
+            }
+            private set // only let this class update the position
+            {
+                this.SetField(ref _xPosition, value, () => xPosition);
+            }
+        }
+        private decimal _yPosition = 0;
+        public decimal yPosition
+        {
+            get
+            {
+                return _yPosition;
+            }
+            private set // only let this class update the position
+            {
+                this.SetField(ref _yPosition, value, () => yPosition);
+            }
+        }
+        #endregion
         Queue<byte[]> commands = new Queue<byte[]>(); // fifo buffer.
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
