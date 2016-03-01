@@ -23,7 +23,13 @@ namespace ViewModel
             PressureCom = "COM9";
             StepperCom = "COM6";
             HotWireCom = "COM14";
+
+            timer.Tick += UIUpdateTimer; // Timer to update UI information
+            timer.Interval = new TimeSpan(0, 0, 0, 0,500); //tick every 500ms
+            timer.Start();
         }
+
+     
         // worker process
         private Dispatcher dispatcher;
 
@@ -34,7 +40,7 @@ namespace ViewModel
         public void AssignDispatcher(Dispatcher dispatcher)
         {
             this.dispatcher = dispatcher;
-            PressureController.setDispatcher(this.dispatcher);
+          //  PressureController.setDispatcher(this.dispatcher);
         }
         #endregion
         #region Connect-DisconnectFunctions
@@ -104,22 +110,22 @@ namespace ViewModel
         #region Step Nudge
         public void StepLeft()
         {
-            if (StepperController.isBusy == false)
+            if (StepperController.isBusy == false && StepperController.isConnected == true)
                 StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepRight()
         {
-            if (StepperController.isBusy == false)
+            if (StepperController.isBusy == false && StepperController.isConnected == true)
                 StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         public void StepUp()
         {
-            if (StepperController.isBusy == false)
+            if (StepperController.isBusy == false && StepperController.isConnected == true)
                 StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepDown()
         {
-            if (StepperController.isBusy == false)
+            if (StepperController.isBusy == false && StepperController.isConnected == true)
                 StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         #endregion
@@ -132,6 +138,15 @@ namespace ViewModel
         {
             
         }
+        #endregion
+        #region UI Timing
+        DispatcherTimer timer = new DispatcherTimer();
+        private void UIUpdateTimer(object sender, EventArgs e)
+        {
+            PressureController.TriggerUIUpdate(); // trigger a request to update the sensor values and graph data.
+        }
+
+
         #endregion
     }
 
