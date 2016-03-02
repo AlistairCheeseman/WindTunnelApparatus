@@ -83,14 +83,14 @@ entity DataSequencer is
 end DataSequencer;
 
 architecture Behavioral of DataSequencer is
-  type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE,STATE_CLOCKIN, STATE_UPDATEMUX);
+  type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE,STATE_CLOCKIN, STATE_UPDATEMUX, STATE_EOL);
   signal state_reg: state_type := STATE_WAIT;
  
-  constant Maxtimeout  : positive := 100;
+  constant Maxtimeout  : positive := 2500;
   
   signal multiplexerState : INTEGER RANGE 0 to 9 := 0;
-  signal timeoutCount     : INTEGER RANGE 0 to Maxtimeout:= 0; -- wait 1ms before a timeout.
-  signal currentByteCount : INTEGER RANGE 0 to 6:= 0; --6 bytes of data per sensor.
+  signal timeoutCount     : INTEGER RANGE 0 to Maxtimeout +5:= 0; -- wait 1ms before a timeout.
+  signal currentByteCount : INTEGER RANGE 0 to 8:= 0; --6 bytes of data per sensor.
   
   
 begin
@@ -116,129 +116,155 @@ if (reset = '1') then
 else
     if rising_edge (clk) then
     case state_reg is
-            when STATE_UPDATEMUX =>
-                -- when a read has just completed or a timeout has occured.
-                timeoutCount <= 0; -- reset the timeout counter
-                if (currentByteCount = 5) then
-                    currentByteCount <= 0;
-                    if (multiplexerState = 9) then -- update multiplexer to next sensor.
-                        multiplexerState <= 0;
-                    else
-                        multiplexerState <= multiplexerState +1;
-                    end if;
-                else
-                    currentByteCount <= currentByteCount +1;
-                end if;
-                state_reg <= STATE_WAIT;
             when STATE_WAIT =>
               case multiplexerState is
                    when 0 =>
                        if (I2C1_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
-                        state_reg <= STATE_STARTREAD;
+                            state_reg <= STATE_STARTREAD;
                        end if;
                    when 1 =>
                         if (I2C2_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
-                        state_reg <= STATE_STARTREAD;
+                            state_reg <= STATE_STARTREAD;
                        end if;
                    when 2 =>
                        if (I2C3_FIFO_Empty = '1') then
+                       if (currentByteCount = 0) then 
                         timeoutCount <= timeoutCount + 1; -- increase the timeout count.
                         if (timeoutCount = Maxtimeout) then
                             state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
                         else
                             state_reg <= STATE_WAIT; -- else carry on waiting.
                         end if;
+                        else
+                            state_reg <= STATE_WAIT;
+                       end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 3 =>
                        if (I2C4_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        if (currentByteCount = 0) then
+                            timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                            if (timeoutCount = Maxtimeout) then
+                                state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                            else
+                                state_reg <= STATE_WAIT; -- else carry on waiting.
+                            end if;
                         else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                            state_reg <= STATE_WAIT;
                         end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 4 =>
                        if (I2C5_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
-                        state_reg <= STATE_STARTREAD;
+                            state_reg <= STATE_STARTREAD;
                        end if;
                    when 5 =>
                        if (I2C6_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 6 =>
                        if (I2C7_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 7 =>
                        if (I2C8_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                        if (currentByteCount = 0) then
+                            timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                            if (timeoutCount = Maxtimeout) then
+                                state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                            else
+                                state_reg <= STATE_WAIT; -- else carry on waiting.
+                            end if;
                         else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
+                            state_reg <= STATE_WAIT;
                         end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 8 =>
                        if (I2C9_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;  
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
                    when 9 =>
                        if (I2C10_FIFO_Empty = '1') then
-                        timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                        if (timeoutCount = Maxtimeout) then
-                            state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                        else
-                            state_reg <= STATE_WAIT; -- else carry on waiting.
-                        end if;
+                            if (currentByteCount = 0) then
+                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                                if (timeoutCount = Maxtimeout) then
+                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                                else
+                                    state_reg <= STATE_WAIT; -- else carry on waiting.
+                                end if;
+                            else
+                                state_reg <= STATE_WAIT;
+                            end if;
                        else
                         state_reg <= STATE_STARTREAD;
                        end if;
@@ -320,6 +346,7 @@ else
                     when 9 =>
                         S_FIFO_DataIn <= I2C10_FIFO_DataOut;
                     when others =>
+                    
                 end case;
                 if ('0' = S_FIFO_Full) then 
                     state_reg <= STATE_STARTWRITE;
@@ -335,9 +362,50 @@ else
             when STATE_STARTWRITE =>
                 S_FIFO_WriteEn <= '1';
                 state_reg <= STATE_FINISHWRITE;
+                currentByteCount <= currentByteCount +1; --- update the byte count.
             when STATE_FINISHWRITE => 
                 S_FIFO_WriteEn <= '0';
                 state_reg <= STATE_UPDATEMUX;
+            when STATE_UPDATEMUX => -- when a read has just completed or a timeout has occured.
+            -- this is called when one of these things have happened:
+                    --> TIMEOUT - reading a sensor has timed out --> 
+                        --> IF A TIMEOUT HAS HAPPENED ON SENSOR 10 --> WRITE EOL
+                        --> ELSE just move onto next sensor
+                    --> FINISH BYTE WRITE --> A byte has just finished writing
+                        --> FINISH EOL - an EOL has just been written --> an EOL has just been written
+                        --> FINISH SENSOR READ - 6 bytes have been read --> move onto the next sensor
+                        --> FINISH BYTE READ - a byte has just been read --> read the next one
+                    if (timeoutCount >= (MaxTimeout) AND CurrentByteCount = 0) then -- this has been called by a timeout.
+                        if (multiplexerState = 9) then -- sensor 10 timeout, write the EOL.
+                            state_reg <= STATE_EOL; -- write the EOL.
+                        else
+                            timeoutCount <= 0; -- reset the timeout counter
+                            multiplexerState <= multiplexerState +1; -- move onto the next sensor.
+                            state_reg <= STATE_WAIT;
+                        end if;
+                    else
+                        -- a byte was just written.
+                        if ((multiplexerState = 9 AND timeoutCount >= (MaxTimeout)) OR (currentByteCount = 7))  then -- the EOL was just written, start the read all over again.
+                            timeoutCount<=0;
+                            multiplexerState <= 0; 
+                            currentByteCount <=0;
+                            state_reg <= STATE_WAIT;
+                        elsif (currentByteCount = 6) then -- the final byte of a sensor read was written 
+                            if (multiplexerState = 9) then
+                                timeoutCount <=0;
+                                state_reg <= STATE_EOL;
+                            else
+                                timeoutCount<=0;
+                                multiplexerState <= multiplexerState +1;
+                                currentByteCount<=0;
+                            end if;
+                        else -- a byte has been read
+                            state_reg <= STATE_WAIT;--don't need to do anything, just continue.                        
+                        end if;
+                    end if;
+            when STATE_EOL =>
+                S_FIFO_DataIn <= "11111111";
+                state_reg <= STATE_STARTWRITE;
             when others =>
                 state_reg <= STATE_WAIT;
     end case;
