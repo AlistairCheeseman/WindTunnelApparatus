@@ -86,7 +86,7 @@ architecture Behavioral of DataSequencer is
   type state_type is ( STATE_WAIT, STATE_STARTREAD, STATE_ENDREAD, STATE_WAITFULL,  STATE_STARTWRITE, STATE_FINISHWRITE,STATE_CLOCKIN, STATE_UPDATEMUX, STATE_EOL);
   signal state_reg: state_type := STATE_WAIT;
  
-  constant Maxtimeout  : positive := 2500;
+  constant Maxtimeout  : positive := 4000;
   
   signal multiplexerState : INTEGER RANGE 0 to 9 := 0;
   signal timeoutCount     : INTEGER RANGE 0 to Maxtimeout +5:= 0; -- wait 1ms before a timeout.
@@ -121,12 +121,12 @@ else
                    when 0 =>
                        if (I2C1_FIFO_Empty = '1') then
                             if (currentByteCount = 0) then
-                                timeoutCount <= timeoutCount + 1; -- increase the timeout count.
-                                if (timeoutCount = Maxtimeout) then
-                                    state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
-                                else
+                             --   timeoutCount <= timeoutCount + 1; -- increase the timeout count.
+                            --    if (timeoutCount = Maxtimeout) then
+                            --        state_reg <= STATE_UPDATEMUX; -- timeout has occured, move to the next sensor.
+                            --    else
                                     state_reg <= STATE_WAIT; -- else carry on waiting.
-                                end if;
+                            --    end if;
                             else
                                 state_reg <= STATE_WAIT;
                             end if;
