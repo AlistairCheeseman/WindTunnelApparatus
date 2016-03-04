@@ -22,42 +22,44 @@ namespace ViewModel.SensorControllers
         DateTime? LastReading = null;
         //Background workers
         BackgroundWorker SerialWorker = new BackgroundWorker();
+        BackgroundWorker DataSerialiser = new BackgroundWorker();
         BackgroundWorker DataProcessor = new BackgroundWorker();
-        /// <summary>
-        ///  class to hold raw timestamped data.
-        /// </summary>
         // buffer between SerialWorker and DataProcessor.
-        ConcurrentQueue<Byte> RawQueue = new ConcurrentQueue<Byte>(); // a threadsafe queue of data to be processed.
+        BlockingCollection<byte[]> ArrayQueue = new BlockingCollection<byte[]>(); // a thread-safe queue of serial array data to be processed.
+        BlockingCollection<byte[]> PacketQueue = new BlockingCollection<byte[]>(); // a queue of packets. 
         public PressureController()
         {
             SP = new SerialPort(); // create the serial port.
             SP.BaudRate = 2000000; // the baud rate of the FPGA
-            SP.ReadBufferSize = 2147483646; //the max buffer size so we don't slow down the FPGA.
+            SP.ReadBufferSize = 2147483646; //the Max buffer size so we don't slow down the FPGA.
             isConnected = false; // default to not connected.
             SerialWorker.DoWork += BWReadSerial; // assign the serial reader function
+            SerialWorker.WorkerSupportsCancellation = true;
+            DataSerialiser.DoWork += BWSerialiser; // assign the data serialiser.
             DataProcessor.DoWork += BWDataProcessor; // assign the data reader process
         }
+
         #region Data container + helpers
         List<PressureData> OutputData = new List<PressureData>();
-        public decimal CurrentSensor1Reading
+        public double CurrentSensor1Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor2Reading
+        public double CurrentSensor2Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor3Reading
+        public double CurrentSensor3Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor4Reading
+        public double CurrentSensor4Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor5Reading
+        public double CurrentSensor5Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor6Reading
+        public double CurrentSensor6Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor7Reading
+        public double CurrentSensor7Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor8Reading
+        public double CurrentSensor8Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor9Reading
+        public double CurrentSensor9Reading
         { get; private set; } = 0;
-        public decimal CurrentSensor10Reading
+        public double CurrentSensor10Reading
         { get; private set; } = 0;
         // data class for the graph to look at.
         public List<PressureData> GraphData
@@ -69,6 +71,42 @@ namespace ViewModel.SensorControllers
         }
         #endregion
         #region Connection Information
+        private int _SerialQueueCount = 0;
+        public int SerialQueueCount
+        {
+            get
+            {
+                return _SerialQueueCount;
+            }
+            private set
+            {
+                _SerialQueueCount = value;
+            }
+        }
+        private int _BytesQueueCount = 0;
+        public int BytesQueueCount
+        {
+            get
+            {
+                return _BytesQueueCount;
+            }
+            private set
+            {
+                _BytesQueueCount = value;
+            }
+        }
+        private int _PacketQueueCount = 0;
+        public int PacketQueueCount
+        {
+            get
+            {
+                return _PacketQueueCount;
+            }
+            private set
+            {
+                _PacketQueueCount = value;
+            }
+        }
         private ConnectionState _ConnectionState = ConnectionState.Disconnected;
         public ConnectionState ConnectionState
         {
@@ -104,168 +142,156 @@ namespace ViewModel.SensorControllers
 
         #region Background Workers
         long ReadingCount = 0; // counter for number of readings
-        private byte peekByte()
-        {
-            byte record = 0x00;
-            bool hasByte = false;
-            while (hasByte == false)
-            {
-                if (RawQueue.TryPeek(out record) == true)
-                {
-                    hasByte = true;
-                    return record;
-                }
-                else
-                {
-                    System.Threading.Thread.Sleep(RandomGenerator.Next(1, 5)); // sleep a random amount of time (1ms - 5ms) before retrying.
-                }
-            }
-
-            // this bit is never reached.
-            return 0x00;
-        }
-        private byte getByte()
-        {
-            byte record = 0x00;
-            bool hasByte = false;
-            while (hasByte == false)
-            {
-                if (RawQueue.TryDequeue(out record) == true)
-                {
-                    hasByte = true;
-                    return record;
-                }
-                else
-                    System.Threading.Thread.Sleep(RandomGenerator.Next(1, 5)); // sleep a random amount of time (1ms - 5ms) before retrying.
-            }
-            // this bit is never reached.
-            return 0x00;
-        }
-        private void BWDataProcessor(object sender, DoWorkEventArgs e)
-        {
-
-            while (RawQueue.Count > 6) // while there is enough data to be able to process a payload. ( a bit of wiggle room incase of a bad packet.
-            {
-
-                byte[] currentPacket = new byte[12];
-                int currentByteIndex = 0;
-                bool finishFlag = false; // if true quit the 
-                while (finishFlag == false)
-                {
-                    byte PeekRecord = 0x00;
-                    PeekRecord = this.peekByte();// we could peek the record, see what it looks like
-                    if (PeekRecord == 0x00 && currentByteIndex >= 5)
-                    {
-                        //BOOM end of record!
-                        finishFlag = true;
-                        continue;
-                    }
-                    else
-                    {
-                        // it is just another record, 
-                        currentPacket[currentByteIndex] = this.getByte();
-                        currentByteIndex++;
-                        continue;// exit the loop
-                    }
-                }
-
-
-                // finally get the delimiter record with its timestamp value, so we need to get the full record, not just the data.
-                byte delimeter = this.getByte();
-                if (delimeter != 0x00)
-                {
-                    Console.WriteLine("Woah, lost sync!");// somehow we have lost sync?!???!!
-                    continue; // we need to recover from this.
-                }
-
-                if (currentByteIndex > 5)
-                {
-                    Console.WriteLine("Too much data between delimeters, this is expected for the 1st value returned.");
-                    continue; // way too much data between delimeters, skip this data.
-                }
-                else if ((currentByteIndex) == 5) // if the sum of the indexes == 5 we have a whole 6 bytes!
-                {
-                    // we have a whole packet here!
-                    ushort rawPressure = (ushort)(((currentPacket[0] & 0x3F) << 8) | currentPacket[1]); // get the actual data and remove any error codes.
-                    ushort rawTemperature = (ushort)(((currentPacket[2]) << 8) | currentPacket[3] & 0xE0); // get the temperature data, make sure there isn't any extra crap.
-                    rawTemperature = (ushort)(rawTemperature >> 5); // align the temperature correctly, was left aligned, make right aligned.
-                    ushort SensorId = (ushort)(currentPacket[4]); // get the sensor Id.
-                    ushort ErrorCode = (ushort)(currentPacket[0] & 0xC0); // get the error code. 0 - none, 2 - stale data, 3 - bridge error 1 - device in diagnostic mode.
-                    decimal cmH2o = ((rawPressure - 1638.0M) / 655.35M) - 10M;
-                    decimal Pa = cmH2o * 98.0665M;
-
-                    if (LastReading == null | ReadingCount == 0) // if there hasn't been a reading.
-                        LastReading = FirstReading.Value;  // set the timestamp value for this data set.
-
-                    //temp range = 2048 - 0 == -5 to +65
-                    decimal Temperature = ((decimal)rawTemperature * (70.0M / 2048.0M)) - 5.0M;
-
-                    // this is just for timing checking to see if sync roughly matches up:
-                    double jitter = (DateTime.Now - LastReading.Value).TotalMilliseconds;
-                    if (jitter > 100 || jitter < -100)
-                        Console.WriteLine("TIME SYNC LOST: {0}", jitter);
-
-
-                    OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
-                    ReadingCount++;
-                    this.CurrentSensor1Reading = Pa;
-
-
-
-                    if (this.peekByte() == 0xFF) // if after a delimeter, we get a FF, that means that it is the end of a reading, note: it is impossible to get a pressure data reading of FF as max possible reading is F9.
-                    {
-                        this.getByte(); /// clear this byte off the stack.
-                        // it is the start of a new batch of readings, update the timestamp for the next set of values.
-                        LastReading = LastReading.Value + TTR;
-                    }
-                }
-                else
-                    Console.WriteLine("ERROR BAD PACKET");
-            }
-        }
         // this process is designed to be very quick and lightweight. The heavy lifting is done by the data processor.
+        // this process reads serial data as quick as possible and passes off to BWSserialiser
         private void BWReadSerial(object sender, DoWorkEventArgs e)
         {
             bool finishFlag = false;
-
-            while (finishFlag == false)
+            while (finishFlag == false && e.Cancel == false)
             {
-                if (FirstReading == null)
-                    FirstReading = (DateTime.Now);
-                if (SP.IsOpen == false)
+                if (SP != null && SP.IsOpen == false)
                 {
                     finishFlag = true;
                     this.isConnected = false;
                     break; // close the worker down.
                 }
+                SerialQueueCount = SP.BytesToRead;
+                if (FirstReading == null)
+                    FirstReading = (DateTime.Now);
+                
                 int bytes = SP.BytesToRead;
                 if (bytes == 0x00)
                 {
                     System.Threading.Thread.Sleep(100); // sleep and wait for data.
                     continue; // move to next loop.
                 }
+                else if (bytes > System.Int32.MaxValue) // catch a too big buffer.
+                    bytes = System.Int32.MaxValue;
                 byte[] data = new byte[bytes];
                 SP.Read(data, 0, bytes);
-
-                for (int p = 0; p < bytes; p++)
-                {// for each byte received.
-                      RawQueue.Enqueue(data[p]);
-                    //   Console.Write(data[p].ToString("X2") + "-");
-                    //   if (data[p] == 0x00)
-                    //        Console.WriteLine();
-                    // also write the data to a file:
-
+                bool hasAdded = false;
+                while (hasAdded == false)
+                {
+                    hasAdded = ArrayQueue.TryAdd(data);
+                    if (hasAdded == false)
+                        System.Threading.Thread.Sleep(new TimeSpan(100)); // wait 10 uS
                 }
                 // if the data processor is not working, give it a kick.
-
-                        if (DataProcessor.IsBusy == false)
-                            DataProcessor.RunWorkerAsync();
-
-
+                if (DataSerialiser.IsBusy == false)
+                    DataSerialiser.RunWorkerAsync();
+                // write the data to the raw file.
                 if (FS != null)
-                    FS.WriteAsync(data, 0, bytes);
+                    FS.WriteAsync(data, 0, bytes);  
             }
         }
+        // this takes byte arrays and serialises them into a potential packet this makes the actual processing quicker and easier.
+        private void BWSerialiser(object sender, DoWorkEventArgs e)
+        {
+            byte lastrecord = 0x00;
+            byte[] currentPacket = new byte[200]; // a nice big buffer in case the data has become mangled.
+            int dataIndex = 0; // pointer to hold the index to the array
+            foreach (var item in ArrayQueue.GetConsumingEnumerable()) // this gets each item, blocking if there is not any data, quits when CompleteAdding() is finished.
+            {
+                byte[] dataIn = item;
+                int count = dataIn.Count();
+                for (int record = 0; record < count; record++)
+                {
+                    currentPacket[dataIndex] = dataIn[record];
+                    if (dataIndex != 0)
+                    lastrecord = currentPacket[dataIndex - 1]; 
+
+                    dataIndex++;
+                    if (dataIn[record] == 0xFF && lastrecord == 0x00)// commented out to try and keep sync. && dataIndex > 61) // check we have at least a full packet.
+                    {
+                        byte[] dataOut = new byte[dataIndex];
+                        Buffer.BlockCopy(currentPacket, 0, dataOut, 0, dataIndex);
+                        bool hasAdded = false;
+                        while (hasAdded == false)
+                        {
+                           hasAdded = PacketQueue.TryAdd(dataOut);
+                            if (hasAdded == false)
+                                System.Threading.Thread.Sleep(new TimeSpan(100)); // wait 10 uS
+                        }
+                        dataIndex = 0;
+                    }
+                }
+                // if the data processor is not working, give it a kick.
+                if (DataProcessor.IsBusy == false)
+                    DataProcessor.RunWorkerAsync();
+
+                BytesQueueCount = ArrayQueue.Count();
+            }
+            PacketQueue.CompleteAdding(); // we have finished processing, make sure the data processor is aware that we have finished adding.
+        }
+        // this actually process the data and gives the sensor readings.
+        private void BWDataProcessor(object sender, DoWorkEventArgs e)
+        {
+            foreach (var item in PacketQueue.GetConsumingEnumerable())
+            {
+                if (LastReading == null | ReadingCount == 0) // if there hasn't been a reading.
+                    LastReading = FirstReading.Value;  // set the time stamp value for this data set.
+                // Console.WriteLine(BitConverter.ToString(item));
+                PacketQueueCount = PacketQueue.Count();
+                int SensorCount = 0;
+                int remainder = 0;
+                SensorCount = System.Math.DivRem(item.Count() - 1, 6, out remainder);
+                if (item.Count() <= 6)
+                {// the packet is too small.
+                    Console.WriteLine("ERROR: PACKET TOO SMALL.");
+                    continue;
+                } else if (item.Count() > 61)
+                {
+                    Console.WriteLine("ERROR PACKET TOO LARGE");
+                    continue;
+                }
+                else if (SensorCount == 0 | SensorCount > 10)
+                {
+                    Console.WriteLine("ERROR BAD SIZE PACKET");
+                    continue;
+                }
+                else
+                {
+                    //good packet.
+                    for ( int packetCount = 0; packetCount < SensorCount; packetCount++)
+                    {
+                        ushort rawPressure = (ushort)(((item[0 + (packetCount * 6)] & 0x3F) << 8) | item[1 + (packetCount * 6)]); // get the actual data and remove any error codes.
+                        ushort rawTemperature = (ushort)(((item[2] + (packetCount * 6)) << 8) | item[3 + (packetCount * 6)] & 0xE0); // get the temperature data, make sure there isn't any extra crap.
+                        rawTemperature = (ushort)(rawTemperature >> 5); // align the temperature correctly, was left aligned, make right aligned.
+                        ushort SensorId = (ushort)(item[4 + (packetCount * 6)]); // get the sensor Id.
+                        ushort ErrorCode = (ushort)(item[0 + (packetCount * 6)] & 0xC0); // get the error code. 0 - none, 2 - stale data, 3 - bridge error 1 - device in diagnostic mode.
+                        double cmH2o = ((rawPressure - 1638.0) / 655.35) - 10.0;
+                        double Pa = cmH2o * 98.0665;
+                        //temp range = 2048 - 0 == -5 to +65
+                        double Temperature = (rawTemperature * (70.0 / 2048.0)) - 5.0;
+                        OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
+                        ReadingCount++;
+
+                        switch (packetCount)
+                        {
+                            case 0: CurrentSensor1Reading = Pa; break;
+                            case 1: CurrentSensor2Reading = Pa; break;
+                            case 2: CurrentSensor3Reading = Pa; break;
+                            case 3: CurrentSensor4Reading = Pa; break;
+                            case 4: CurrentSensor5Reading = Pa; break;
+                            case 5: CurrentSensor6Reading = Pa; break;
+                            case 6: CurrentSensor7Reading = Pa; break;
+                            case 7: CurrentSensor8Reading = Pa; break;
+                            case 8: CurrentSensor9Reading = Pa; break;
+                            case 9: CurrentSensor10Reading = Pa; break;
+                        }
+                    }
+                    if (item[item.Count() - 1] != 0xFF)
+                    {
+                        Console.WriteLine("LOST PACKET SYNC");
+                        continue;
+
+                    }
+
+                }
+                LastReading = LastReading + TTR; // update the reading time stamp.
+            }
+        }
+
         #endregion
         #region Functions called by other classes
         public void Connect(string ComPort)
@@ -299,20 +325,121 @@ namespace ViewModel.SensorControllers
         }
         public void Disconnect()
         {
-            SP.Close();
-            isConnected = false;
-            FS.Close();
-            FS = null;
-            FirstReading = null;
+            //SP.DiscardInBuffer(); // clear out anything in the serial port receive buffer.
+            SerialWorker.CancelAsync();
+            SP.Close(); // close the serial port, the serial worker will detect this and shutdown.
+            isConnected = false; // set the disconnected flag, this closes down the serial receive worker.
+          //  while (SerialWorker.IsBusy == true) // make sure the serial worker has shut down.
+          //  { System.Threading.Thread.Sleep(1000); } // wait 1 second for the serial worker to finish what it is doing before closing the log file.
+            FS.FlushAsync(); // write any remaining stuff to disk
+            FS.Close(); // close the raw log file
+            FS = null; // close the handle to the log file
+            FirstReading = null; // reset the reading timer.
+            ArrayQueue.CompleteAdding(); // lock down the serial queue, causing the serial worker to finish what data is left in the queue.
+
+        }
+        class ExportData
+        {
+            public int id;
+            public DateTime moment;
+            public double Pressure1;
+            public double Temperature1;
+            public double Pressure2;
+            public double Temperature2;
+            public double Pressure3;
+            public double Temperature3;
+            public double Pressure4;
+            public double Temperature4;
+            public double Pressure5;
+            public double Temperature5;
+            public double Pressure6;
+            public double Temperature6;
+            public double Pressure7;
+            public double Temperature7;
+            public double Pressure8;
+            public double Temperature8;
+            public double Pressure9;
+            public double Temperature9;
+            public double Pressure10;
+            public double Temperature10;
         }
         public void ExportNiceData(string FilePath)
         {
-            IOrderedEnumerable<PressureData> ExportList = OutputData.OrderBy(x => x.id); // export ordered Data.
+            IOrderedEnumerable<PressureData> DataList = OutputData.OrderBy(x => x.id); // export ordered Data.
+            List<ExportData> Exportdata = new List<ExportData>();
             StringBuilder SB = new StringBuilder();
-            SB.Append("id, Time, Sensor, Value(Pa), Temperature(°C)\r\n");
-            foreach (PressureData data in ExportList)
+            SB.Append("id, Time, Value1(Pa), Temperature1(C), Value2(Pa), Temperature2(C), Value3(Pa), Temperature3(C), Value4(Pa), Temperature4(C), Value5(Pa), Temperature5(C), Value6(Pa), Temperature6(C), Value7(Pa), Temperature7(C), Value8(Pa), Temperature8(C), Value9(Pa), Temperature9(C), Value10(Pa), Temperature10(C)\r\n");
+            int t = 0;
+            ExportData record = null;
+            foreach (PressureData data in DataList)
+            {   
+                switch (data.sensorId)
+                {
+                    case 1:
+                        if (record != null)
+                            Exportdata.Add(record);
+                        record = new ExportData();
+                        record.id = t;
+                        t++;
+                        record.moment = data.moment;
+                        record.Pressure1 = data.Pressure;
+                        record.Temperature1 = data.Temperature;
+                        break;
+                    case 2:
+                        record.Pressure2 = data.Pressure;
+                        record.Temperature2 = data.Temperature;
+                        break;
+                    case 3:
+                        record.Pressure3 = data.Pressure;
+                        record.Temperature3 = data.Temperature;
+                        break;
+                    case 4:
+                        record.Pressure4 = data.Pressure;
+                        record.Temperature4 = data.Temperature;
+                        break;
+                    case 5:
+                        record.Pressure5 = data.Pressure;
+                        record.Temperature5 = data.Temperature;
+                        break;
+                    case 6:
+                        record.Pressure6 = data.Pressure;
+                        record.Temperature6 = data.Temperature;
+                        break;
+                    case 7:
+                        record.Pressure7 = data.Pressure;
+                        record.Temperature7 = data.Temperature;
+                        break;
+                    case 8:
+                        record.Pressure8 = data.Pressure;
+                        record.Temperature8 = data.Temperature;
+                        break;
+                    case 9:
+                        record.Pressure9 = data.Pressure;
+                        record.Temperature9 = data.Temperature;
+                        break;
+                    case 10:
+                        record.Pressure10 = data.Pressure;
+                        record.Temperature10 = data.Temperature;
+                        break;
+                }
+              }
+            if (record != null)
+                Exportdata.Add(record);
+            foreach (ExportData ED in Exportdata)
             {
-                SB.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}, {3}, {4}\r\n", data.id, data.moment, data.sensorId, data.Pressure, data.Temperature);
+                SB.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20}, {21}\r\n",
+                ED.id, ED.moment,
+                ED.Pressure1, ED.Temperature1,
+                ED.Pressure2, ED.Temperature2,
+                ED.Pressure3, ED.Temperature3,
+                ED.Pressure4, ED.Temperature4,
+                ED.Pressure5, ED.Temperature5,
+                ED.Pressure6, ED.Temperature6,
+                ED.Pressure7, ED.Temperature7,
+                ED.Pressure8, ED.Temperature8,
+                ED.Pressure9, ED.Temperature9,
+                ED.Pressure10, ED.Temperature10
+                );
             }
             System.IO.File.WriteAllText(FilePath, SB.ToString());
         }
@@ -330,6 +457,10 @@ namespace ViewModel.SensorControllers
             this.OnPropertyChanged("CurrentSensor9Reading");
             this.OnPropertyChanged("CurrentSensor10Reading");
             this.OnPropertyChanged("GraphData");
+            this.OnPropertyChanged("SerialQueueCount");
+            this.OnPropertyChanged("BytesQueueCount");
+            this.OnPropertyChanged("PacketQueueCount");
+            Console.Write(String.Format( "\rSerial Queue: {0} BytesQueue: {1}, PacketQueue: {2}",SerialQueueCount.ToString().PadRight(25), BytesQueueCount.ToString().PadRight(25), PacketQueueCount.ToString().PadRight(25)));
         }
 
         public void ClearBuffer()
