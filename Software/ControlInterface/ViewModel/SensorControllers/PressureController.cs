@@ -104,70 +104,74 @@ namespace ViewModel.SensorControllers
 
         #region Background Workers
         long ReadingCount = 0; // counter for number of readings
+        private byte peekByte()
+        {
+            byte record = 0x00;
+            bool hasByte = false;
+            while (hasByte == false)
+            {
+                if (RawQueue.TryPeek(out record) == true)
+                {
+                    hasByte = true;
+                    return record;
+                }
+                else
+                {
+                    System.Threading.Thread.Sleep(RandomGenerator.Next(1, 5)); // sleep a random amount of time (1ms - 5ms) before retrying.
+                }
+            }
 
+            // this bit is never reached.
+            return 0x00;
+        }
+        private byte getByte()
+        {
+            byte record = 0x00;
+            bool hasByte = false;
+            while (hasByte == false)
+            {
+                if (RawQueue.TryDequeue(out record) == true)
+                {
+                    hasByte = true;
+                    return record;
+                }
+                else
+                    System.Threading.Thread.Sleep(RandomGenerator.Next(1, 5)); // sleep a random amount of time (1ms - 5ms) before retrying.
+            }
+            // this bit is never reached.
+            return 0x00;
+        }
         private void BWDataProcessor(object sender, DoWorkEventArgs e)
         {
+
             while (RawQueue.Count > 6) // while there is enough data to be able to process a payload. ( a bit of wiggle room incase of a bad packet.
             {
+
                 byte[] currentPacket = new byte[12];
                 int currentByteIndex = 0;
-                bool finishFlag = false; // if true quit the loop
+                bool finishFlag = false; // if true quit the 
                 while (finishFlag == false)
                 {
-                    Byte record = 0x00;
-                    if (RawQueue.TryPeek(out record) == true)
-                    { // we could peek the record, see what it looks like
-                        if (record == 0x00 && currentByteIndex >= 5)
-                        {
-                            //BOOM end of record!
-                            finishFlag = true;
-                            continue;
-                        }
-                        else
-                        {
-                            // it is just another record, 
-                            bool gotRecord = false;
-                            while (gotRecord == false)
-                            {
-                                if (RawQueue.TryDequeue(out record) == true)
-                                {
-                                    currentPacket[currentByteIndex] = record;
-                                    currentByteIndex++;
-                                    gotRecord = true; // we have the record!
-                                    continue; // exit the loop
-                                }
-                                else
-                                {
-                                    // we couldn't dequeue the record!!!!!!!!.
-                                    System.Threading.Thread.Sleep(RandomGenerator.Next()); // sleep a random amount of time before retrying.
-                                }
-                            }
-                        }
+                    byte PeekRecord = 0x00;
+                    PeekRecord = this.peekByte();// we could peek the record, see what it looks like
+                    if (PeekRecord == 0x00 && currentByteIndex >= 5)
+                    {
+                        //BOOM end of record!
+                        finishFlag = true;
+                        continue;
                     }
                     else
                     {
-                        System.Threading.Thread.Sleep(RandomGenerator.Next()); // sleep a random amount of time before retrying.
+                        // it is just another record, 
+                        currentPacket[currentByteIndex] = this.getByte();
+                        currentByteIndex++;
+                        continue;// exit the loop
                     }
                 }
 
 
                 // finally get the delimiter record with its timestamp value, so we need to get the full record, not just the data.
-                byte delimeter = 0x00;
-                bool gotDelimeterRecord = false;
-                while (gotDelimeterRecord == false)
-                {
-                    if (RawQueue.TryDequeue(out delimeter) == true)
-                    {
-                        gotDelimeterRecord = true; // we have the record!
-                        continue; // exit the loop
-                    }
-                    else
-                    {
-                        // we couldn't dequeue the record!!!!!!!!.
-                        System.Threading.Thread.Sleep(RandomGenerator.Next()); // sleep a random amount of time before retrying.
-                    }
-                }
-
+                byte delimeter = this.getByte();
                 if (delimeter != 0x00)
                 {
                     Console.WriteLine("Woah, lost sync!");// somehow we have lost sync?!???!!
@@ -190,20 +194,8 @@ namespace ViewModel.SensorControllers
                     decimal cmH2o = ((rawPressure - 1638.0M) / 655.35M) - 10M;
                     decimal Pa = cmH2o * 98.0665M;
 
-
-                    
-                    if (ReadingCount == 0 | LastReading == null)
-                    {
-                        LastReading = FirstReading.Value; // it is the 1st reading, don't increment.
-                    }
-                    else if (SensorId ==1)
-                    {
-                        // it is the start of a new batch of readings.
-                        LastReading = LastReading.Value + TTR;
-                    }
-
-
-
+                    if (LastReading == null | ReadingCount == 0) // if there hasn't been a reading.
+                        LastReading = FirstReading.Value;  // set the timestamp value for this data set.
 
                     //temp range = 2048 - 0 == -5 to +65
                     decimal Temperature = ((decimal)rawTemperature * (70.0M / 2048.0M)) - 5.0M;
@@ -217,6 +209,15 @@ namespace ViewModel.SensorControllers
                     OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
                     ReadingCount++;
                     this.CurrentSensor1Reading = Pa;
+
+
+
+                    if (this.peekByte() == 0xFF) // if after a delimeter, we get a FF, that means that it is the end of a reading, note: it is impossible to get a pressure data reading of FF as max possible reading is F9.
+                    {
+                        this.getByte(); /// clear this byte off the stack.
+                        // it is the start of a new batch of readings, update the timestamp for the next set of values.
+                        LastReading = LastReading.Value + TTR;
+                    }
                 }
                 else
                     Console.WriteLine("ERROR BAD PACKET");
@@ -229,6 +230,8 @@ namespace ViewModel.SensorControllers
 
             while (finishFlag == false)
             {
+                if (FirstReading == null)
+                    FirstReading = (DateTime.Now);
                 if (SP.IsOpen == false)
                 {
                     finishFlag = true;
@@ -243,23 +246,24 @@ namespace ViewModel.SensorControllers
                 }
                 byte[] data = new byte[bytes];
                 SP.Read(data, 0, bytes);
+
                 for (int p = 0; p < bytes; p++)
                 {// for each byte received.
-                    if (FirstReading == null)
-                        FirstReading = (DateTime.Now);
-
-                    ////   RawQueue.Enqueue(data[p]);
-                        Console.Write(data[p].ToString("X2") + "-");
-                    if (data[p] == 0x00)
-                        Console.WriteLine();
+                      RawQueue.Enqueue(data[p]);
+                    //   Console.Write(data[p].ToString("X2") + "-");
+                    //   if (data[p] == 0x00)
+                    //        Console.WriteLine();
                     // also write the data to a file:
-                    if (FS != null)
-                        FS.WriteByte(data[p]);
+
                 }
                 // if the data processor is not working, give it a kick.
- 
-            //        if (DataProcessor.IsBusy == false)
-        //            DataProcessor.RunWorkerAsync();
+
+                        if (DataProcessor.IsBusy == false)
+                            DataProcessor.RunWorkerAsync();
+
+
+                if (FS != null)
+                    FS.WriteAsync(data, 0, bytes);
             }
         }
         #endregion
