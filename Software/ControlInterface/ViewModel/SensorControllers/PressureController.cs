@@ -188,7 +188,7 @@ namespace ViewModel.SensorControllers
         private void BWSerialiser(object sender, DoWorkEventArgs e)
         {
             byte lastrecord = 0x00;
-            byte[] currentPacket = new byte[200]; // a nice big buffer in case the data has become mangled.
+            byte[] currentPacket = new byte[500]; // a nice big buffer in case the data has become mangled.
             int dataIndex = 0; // pointer to hold the index to the array
             foreach (var item in ArrayQueue.GetConsumingEnumerable()) // this gets each item, blocking if there is not any data, quits when CompleteAdding() is finished.
             {
@@ -255,7 +255,8 @@ namespace ViewModel.SensorControllers
                     for ( int packetCount = 0; packetCount < SensorCount; packetCount++)
                     {
                         ushort rawPressure = (ushort)(((item[0 + (packetCount * 6)] & 0x3F) << 8) | item[1 + (packetCount * 6)]); // get the actual data and remove any error codes.
-                        ushort rawTemperature = (ushort)(((item[2] + (packetCount * 6)) << 8) | item[3 + (packetCount * 6)] & 0xE0); // get the temperature data, make sure there isn't any extra crap.
+                       
+                        ushort rawTemperature = (ushort)(((item[2 + (packetCount * 6)]) << 8) | item[3 + (packetCount * 6)] & 0xE0); // get the temperature data, make sure there isn't any extra crap.
                         rawTemperature = (ushort)(rawTemperature >> 5); // align the temperature correctly, was left aligned, make right aligned.
                         ushort SensorId = (ushort)(item[4 + (packetCount * 6)]); // get the sensor Id.
                         ushort ErrorCode = (ushort)(item[0 + (packetCount * 6)] & 0xC0); // get the error code. 0 - none, 2 - stale data, 3 - bridge error 1 - device in diagnostic mode.
@@ -263,21 +264,22 @@ namespace ViewModel.SensorControllers
                         double Pa = cmH2o * 98.0665;
                         //temp range = 2048 - 0 == -5 to +65
                         double Temperature = (rawTemperature * (70.0 / 2048.0)) - 5.0;
+
                         OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
                         ReadingCount++;
 
-                        switch (packetCount)
+                        switch (SensorId)
                         {
-                            case 0: CurrentSensor1Reading = Pa; break;
-                            case 1: CurrentSensor2Reading = Pa; break;
-                            case 2: CurrentSensor3Reading = Pa; break;
-                            case 3: CurrentSensor4Reading = Pa; break;
-                            case 4: CurrentSensor5Reading = Pa; break;
-                            case 5: CurrentSensor6Reading = Pa; break;
-                            case 6: CurrentSensor7Reading = Pa; break;
-                            case 7: CurrentSensor8Reading = Pa; break;
-                            case 8: CurrentSensor9Reading = Pa; break;
-                            case 9: CurrentSensor10Reading = Pa; break;
+                            case 1: CurrentSensor1Reading = Pa; break;
+                            case 2: CurrentSensor2Reading = Pa; break;
+                            case 3: CurrentSensor3Reading = Pa; break;
+                            case 4: CurrentSensor4Reading = Pa; break;
+                            case 5: CurrentSensor5Reading = Pa; break;
+                            case 6: CurrentSensor6Reading = Pa; break;
+                            case 7: CurrentSensor7Reading = Pa; break;
+                            case 8: CurrentSensor8Reading = Pa; break;
+                            case 9: CurrentSensor9Reading = Pa; break;
+                            case 10: CurrentSensor10Reading = Pa; break;
                         }
                     }
                     if (item[item.Count() - 1] != 0xFF)
