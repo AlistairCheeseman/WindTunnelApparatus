@@ -823,7 +823,7 @@ F 1 "OPA320" H 8510 2830 50  0000 C CNN
 F 2 "TO_SOT_Packages_SMD:SOT-23-5" H 8260 3130 50  0001 C CNN
 F 3 "" H 8360 3230 50  0000 C CNN
 	1    8310 3030
-	-1   0    0    1   
+	-1   0    0    -1  
 $EndComp
 Wire Wire Line
 	7980 3030 8010 3030
@@ -1317,15 +1317,15 @@ F 3 "" H 2850 4830 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3100 5780 3620 5780
+	3100 5780 3110 5780
 Wire Wire Line
-	3100 5880 3620 5880
+	3100 5880 3110 5880
 Wire Wire Line
 	3100 6280 4110 6280
 Wire Wire Line
 	3100 6180 3490 6180
 Wire Wire Line
-	3490 6180 3490 6540
+	3490 6540 3490 6180
 Wire Wire Line
 	2420 6540 2420 6180
 Wire Wire Line
@@ -1483,37 +1483,30 @@ Wire Wire Line
 Wire Wire Line
 	2080 7220 2080 7320
 Wire Wire Line
-	3490 6540 2420 6540
-Text Label 3620 5780 0    60   ~ 0
+	2420 6540 3490 6540
+Text Label 2580 6080 2    60   ~ 0
 ~CONVST
-Text Label 2600 5780 2    60   ~ 0
+Text Label 3110 5980 0    60   ~ 0
 ~RESET
-Text Label 3620 5880 0    60   ~ 0
+Text Label 2580 5980 2    60   ~ 0
 SDO
-Text Label 2600 5880 2    60   ~ 0
+Text Label 2580 5780 2    60   ~ 0
 SDI
-Text Label 3620 5980 0    60   ~ 0
+Text Label 2580 5880 2    60   ~ 0
 FS/~CS
-Text Label 2600 5980 2    60   ~ 0
+Text Label 3110 5780 0    60   ~ 0
 SCLK
-Text Label 2600 6080 2    60   ~ 0
+Text Label 3110 5880 0    60   ~ 0
 EOC/~INT~/CDI
 Wire Wire Line
-	3100 5980 3620 5980
+	3100 5980 3110 5980
 Wire Wire Line
-	3100 6080 3250 6080
-Wire Wire Line
-	2600 6080 2580 6080
-NoConn ~ 3250 6080
+	3100 6080 3110 6080
 Wire Wire Line
 	10500 4580 10600 4580
 NoConn ~ 10600 4580
-Text GLabel 2390 6120 0    60   Input ~ 0
+Text GLabel 3110 6080 2    60   Input ~ 0
 EXT_REF
-Wire Wire Line
-	2390 6120 2580 6120
-Wire Wire Line
-	2580 6120 2580 6080
 $Comp
 L GNDA #PWR034
 U 1 1 56EAC6C3
@@ -1550,4 +1543,12 @@ Wire Notes Line
 	7510 5330 7510 4500
 Text Notes 6760 5420 0    60   ~ 0
 LOW CURRENT MODE
+Wire Wire Line
+	2600 5880 2580 5880
+Wire Wire Line
+	2580 5980 2600 5980
+Wire Wire Line
+	2600 6080 2580 6080
+Wire Wire Line
+	2600 5780 2580 5780
 $EndSCHEMATC
