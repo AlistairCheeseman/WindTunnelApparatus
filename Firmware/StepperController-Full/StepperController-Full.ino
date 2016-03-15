@@ -31,6 +31,7 @@ uint8_t fourBitShiftLeft(uint8_t val);  // barrel shift left
 void stopMotorX(); // disable output -- stops motor from being active
 void stopMotorY(); // disable output -- stops motor from being active
 uint16_t updateDelay(uint64_t totalStep, uint64_t currentStep, uint16_t currentDelay); // calculate the next delay.
+void longDelay(uint16_t usDelay); // a delay routine that ACTUALLY WORKS......hurumph - crappy arduino delay don't work.
 
 // step program initialises serial connection and Zeroes (no hold) axes.
 void setup() {
@@ -85,13 +86,13 @@ void zero()
   while (digitalRead(LimX) == 1)
   {
     stepX(); // step
-    delayMicroseconds(minDelayTime); // wait min delay time
+    longDelay(minDelayTime); // wait min delay time
   }
   stopMotorX();
   while (digitalRead(LimY) == 1)
   {
     stepY();
-    delayMicroseconds(minDelayTime);
+    longDelay(minDelayTime);
   }
   stopMotorY();
 }
@@ -192,23 +193,23 @@ void loop() {
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
         stepX();
-        delayMicroseconds(minDelayTime);
+        longDelay(minDelayTime);
       }
     }
     else if (command[2] == 0x2) // SLOW
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
         stepX();
-        delayMicroseconds(maxDelayTime);
+        longDelay(maxDelayTime);
       }
     else if (command[2] == 0x3) // DYNAMIC
     {
       uint16_t currentDelay = maxDelayTime;
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
       {
         currentDelay = updateDelay(totalStep, currentStep, currentDelay);
         stepX();
-        delayMicroseconds(currentDelay);
+        longDelay(currentDelay);
       }
     }
     if (command[7] != 0x00)
@@ -229,22 +230,22 @@ void loop() {
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
         stepY();
-        delayMicroseconds(minDelayTime);
+        longDelay(minDelayTime);
       }
     else if (command[2] == 0x2) // SLOW
       for ( uint64_t rev = 0; rev <= totalStep; rev++)
       {
         stepY();
-        delayMicroseconds(maxDelayTime);
+        longDelay(maxDelayTime);
       }
     else if (command[2] == 0x3) // DYNAMIC
     {
       uint16_t currentDelay = maxDelayTime;
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
       {
         currentDelay = updateDelay(totalStep, currentStep, currentDelay);
         stepY();
-        delayMicroseconds(currentDelay);
+        longDelay(currentDelay);
       }
     }
     if (command[7] != 0x00)
@@ -253,25 +254,32 @@ void loop() {
     }
     stopMotorY();
   }
-  free(command);
   Serial.println("OK DONE");
 }
 
 uint16_t updateDelay(uint64_t totalStep, uint64_t currentStep, uint16_t currentDelay)
 {
-  if ((currentStep > totalStep - 600))
+  if (currentStep > (totalStep - 600))
   {
     if (currentDelay < maxDelayTime)
-      return currentDelay + 25;
+      return currentDelay + 100;
   }
   else if (currentStep < 600)
   { // accelerate
     if (currentDelay > minDelayTime)
-      return currentDelay - 122;
+      return currentDelay - 100;
     else
       return minDelayTime;
   }
   else
     return currentDelay;
+}
+void longDelay(uint16_t usDelay) // the arduino delayMicros has a massive bug where it will cause an issue if delay for more than 10ms.
+{
+  uint16_t millisCount = usDelay / 1000; // get the number of milliseconds
+  uint16_t microsCount = usDelay % 1000;// get number of micros, by finding remainder when dividing by 1ms.
+  delay(millisCount);
+  delayMicroseconds(microsCount);
+  
 }
 
