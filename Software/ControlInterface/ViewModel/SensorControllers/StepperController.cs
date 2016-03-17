@@ -17,6 +17,11 @@ namespace ViewModel.SensorControllers
     /// </summary>
     public class StepperController : ViewModelBase
     {
+        const int StepsPerRevolution = 200;
+        const double pitch = 1;
+        const double stepResolution = pitch / StepsPerRevolution;
+
+
         SerialPort SP;
         BackgroundWorker BgWorker = new BackgroundWorker();
         /// <summary>
@@ -32,9 +37,10 @@ namespace ViewModel.SensorControllers
             SP.DtrEnable = true; // make the device reset on connect.
             BgWorker.DoWork += BgWorker_DoWork;
         }
+        // variable ONLY for use by the background worker.
+        string thisCommand = string.Empty;
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            string thisCommand = string.Empty;
             while (commands.Count() > 0)
             {
                 byte[] inData = commands.Dequeue();
@@ -42,12 +48,12 @@ namespace ViewModel.SensorControllers
                 foreach (byte t in inData)
                 {
                     Console.Write((char)t);
-                        thisCommand += ((char)t).ToString();
-                        if (((char)t).ToString() == "\n")
-                        {
-                            processCommand(thisCommand);
-                            thisCommand = String.Empty;
-                        }
+                    thisCommand += ((char)t).ToString();
+                    if (((char)t).ToString() == "\n")
+                    {
+                        processCommand(thisCommand);
+                        thisCommand = String.Empty;
+                    }
                 }
             }
         }
@@ -129,8 +135,8 @@ namespace ViewModel.SensorControllers
             }
         }
         #region position information
-        private decimal _xPosition = 0;
-        public decimal xPosition
+        private double _xPosition = 0;
+        public double xPosition
         {
             get
             {
@@ -141,8 +147,8 @@ namespace ViewModel.SensorControllers
                 this.SetField(ref _xPosition, value, () => xPosition);
             }
         }
-        private decimal _yPosition = 0;
-        public decimal yPosition
+        private double _yPosition = 0;
+        public double yPosition
         {
             get
             {
@@ -164,22 +170,78 @@ namespace ViewModel.SensorControllers
             if (BgWorker.IsBusy == false)
                 BgWorker.RunWorkerAsync(); // if the background worker has finished, give it a kick to start up again.
         }
-        
 
-        
+
+        public bool gotoHorizontal(double Horizontalmm)
+        {
+            MotorDirection dir = MotorDirection.none;
+            if (this.isBusy == true)
+                return false;// CANNOT MOVE AS MOTOR BUSY!
+            else
+            {
+                // get current position and calculate the number of steps needed to move.
+                double difference = Math.Abs(xPosition - Horizontalmm); // find the mm difference.
+                // find the direction
+                if (xPosition > Horizontalmm)
+                    dir = MotorDirection.left;
+                else
+                    dir = MotorDirection.right;
+
+                ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
+                byte steps = (byte)((difference - (double)Revs) / stepResolution); // get fraction of mm and divide by step resolution
+                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
+                return true;
+            }
+        }
+        public bool gotoVertical(double Verticalmm)
+        {
+            MotorDirection dir = MotorDirection.none;
+            if (this.isBusy == true)
+                return false;// CANNOT MOVE AS MOTOR BUSY!
+            else
+            {
+                // get current position and calculate the number of steps needed to move.
+                double difference = Math.Abs(yPosition - Verticalmm); // find the mm difference.
+                // find the direction
+                if (xPosition > Verticalmm)
+                    dir = MotorDirection.left;
+                else
+                    dir = MotorDirection.right;
+
+                ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
+                byte steps = (byte)((difference - (double)Revs) / stepResolution); // get fraction of mm and divide by step resolution
+                sendCommand(MotorAxis.y, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
+                return true;
+            }
+        }
 
 
 
         public void processCommand(string command)
         {
             Console.WriteLine("Command Processing: " + command);
-            if (command == "STEPPER V1. ENTER CONFIG\r\n")
+            if (command == "XL\r\n" || command == "XR\r\n")
+            {
+                if (command.Contains("L"))
+                    xPosition = xPosition - stepResolution;
+                else
+                    xPosition = xPosition + stepResolution;
+            }
+            else if (command == "YL\r\n" || command == "YR\r\n")
+            {
+                if (command.Contains("L"))
+                    yPosition = yPosition - stepResolution;
+                else
+                    yPosition = yPosition + stepResolution;
+            }
+            else if (command == "STEPPER V1. ENTER CONFIG\r\n")
             {
                 SP.Write("2 65\r\n"); // give the max speed delay and the min speed delay
             }
             else if (command == "ZEROING ALL AXES\r\n")
             {
-
+                xPosition = 0;
+                yPosition = 0;
             }
             else if (command == "OK WAIT\r\n")
             {
