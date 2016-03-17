@@ -204,14 +204,14 @@ void loop() {
       //actually step the motor
       if (command[2] == 0x1) // FAST
       {
-        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        for ( uint64_t rev = 1; rev <= totalStep; rev++)
         {
           stepX();
           longDelay(minDelayTime);
         }
       }
       else if (command[2] == 0x2) // SLOW
-        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        for ( uint64_t rev = 1; rev <= totalStep; rev++)
         {
           stepX();
           longDelay(maxDelayTime);
@@ -219,7 +219,7 @@ void loop() {
       else if (command[2] == 0x3) // DYNAMIC
       {
         uint16_t currentDelay = maxDelayTime;
-        for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
+        for ( uint64_t currentStep = 1; currentStep <= totalStep; currentStep++)
         {
           currentDelay = updateDelay(totalStep, currentStep, currentDelay);
           stepX();
@@ -241,13 +241,13 @@ void loop() {
 
       //actually step the motor
       if (command[2] == 0x1) // FAST
-        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        for ( uint64_t rev = 1; rev <= totalStep; rev++)
         {
           stepY();
           longDelay(minDelayTime);
         }
       else if (command[2] == 0x2) // SLOW
-        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        for ( uint64_t rev = 1; rev <= totalStep; rev++)
         {
           stepY();
           longDelay(maxDelayTime);
@@ -255,7 +255,7 @@ void loop() {
       else if (command[2] == 0x3) // DYNAMIC
       {
         uint16_t currentDelay = maxDelayTime;
-        for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
+        for ( uint64_t currentStep = 1; currentStep <= totalStep; currentStep++)
         {
           currentDelay = updateDelay(totalStep, currentStep, currentDelay);
           stepY();
