@@ -192,82 +192,82 @@ void loop() {
   steps = command[6];
   uint64_t totalStep = 0;
   totalStep = (revs * 200) + steps;
-  if (totalStep != 0) 
+  if (totalStep != 0)
   {
-  if (command[0] == 0x1) // motorX
-  {
-    if (command[3] == 0x1) // LEFT
-      dirX = DIR_LEFT;
-    else if (command[3] == 0x2) // RIGHT
-      dirX = DIR_RIGHT;
+    if (command[0] == 0x1) // motorX
+    {
+      if (command[3] == 0x1) // LEFT
+        dirX = DIR_LEFT;
+      else if (command[3] == 0x2) // RIGHT
+        dirX = DIR_RIGHT;
 
-    //actually step the motor
-    if (command[2] == 0x1) // FAST
-    {
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      //actually step the motor
+      if (command[2] == 0x1) // FAST
       {
-        stepX();
-        longDelay(minDelayTime);
+        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        {
+          stepX();
+          longDelay(minDelayTime);
+        }
       }
-    }
-    else if (command[2] == 0x2) // SLOW
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      else if (command[2] == 0x2) // SLOW
+        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        {
+          stepX();
+          longDelay(maxDelayTime);
+        }
+      else if (command[2] == 0x3) // DYNAMIC
       {
-        stepX();
-        longDelay(maxDelayTime);
+        uint16_t currentDelay = maxDelayTime;
+        for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
+        {
+          currentDelay = updateDelay(totalStep, currentStep, currentDelay);
+          stepX();
+          longDelay(currentDelay);
+        }
       }
-    else if (command[2] == 0x3) // DYNAMIC
-    {
-      uint16_t currentDelay = maxDelayTime;
-      for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
+      if (command[7] != 0x00)
       {
-        currentDelay = updateDelay(totalStep, currentStep, currentDelay);
-        stepX();
-        longDelay(currentDelay);
+        delay(command[7]);
       }
+      stopMotorX();
     }
-    if (command[7] != 0x00)
+    else if (command[0] == 0x2) //motorY
     {
-      delay(command[7]);
-    }
-    stopMotorX();
-  }
-  else if (command[0] == 0x2) //motorY
-  {
-    if (command[3] == 0x1) // LEFT
-      dirY = DIR_LEFT;
-    else if (command[3] == 0x2) // RIGHT
-      dirY = DIR_RIGHT;
+      if (command[3] == 0x1) // LEFT
+        dirY = DIR_LEFT;
+      else if (command[3] == 0x2) // RIGHT
+        dirY = DIR_RIGHT;
 
-    //actually step the motor
-    if (command[2] == 0x1) // FAST
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      //actually step the motor
+      if (command[2] == 0x1) // FAST
+        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        {
+          stepY();
+          longDelay(minDelayTime);
+        }
+      else if (command[2] == 0x2) // SLOW
+        for ( uint64_t rev = 0; rev <= totalStep; rev++)
+        {
+          stepY();
+          longDelay(maxDelayTime);
+        }
+      else if (command[2] == 0x3) // DYNAMIC
       {
-        stepY();
-        longDelay(minDelayTime);
+        uint16_t currentDelay = maxDelayTime;
+        for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
+        {
+          currentDelay = updateDelay(totalStep, currentStep, currentDelay);
+          stepY();
+          longDelay(currentDelay);
+        }
       }
-    else if (command[2] == 0x2) // SLOW
-      for ( uint64_t rev = 0; rev <= totalStep; rev++)
+      if (command[7] != 0x00)
       {
-        stepY();
-        longDelay(maxDelayTime);
+        delay(command[7]);
       }
-    else if (command[2] == 0x3) // DYNAMIC
-    {
-      uint16_t currentDelay = maxDelayTime;
-      for ( uint64_t currentStep = 0; currentStep <= totalStep; currentStep++)
-      {
-        currentDelay = updateDelay(totalStep, currentStep, currentDelay);
-        stepY();
-        longDelay(currentDelay);
-      }
+      stopMotorY();
     }
-    if (command[7] != 0x00)
-    {
-      delay(command[7]);
-    }
-    stopMotorY();
-  }
   }
   Serial.println("OK DONE");
 }
