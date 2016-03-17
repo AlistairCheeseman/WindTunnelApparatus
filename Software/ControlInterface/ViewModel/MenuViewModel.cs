@@ -28,38 +28,24 @@ namespace ViewModel
             timer.Interval = new TimeSpan(0, 0, 0, 0,500); //tick every 500ms
             timer.Start();
         }
-
-     
-        // worker process
-        private Dispatcher dispatcher;
-
-        //controllers
-        public PressureController PressureController { get; } = new PressureController();
-        public StepperController StepperController { get; } = new StepperController();
         public AutomationController AutomationController { get; } = new AutomationController();
-
-        public void AssignDispatcher(Dispatcher dispatcher)
-        {
-            this.dispatcher = dispatcher;
-          //  PressureController.setDispatcher(this.dispatcher);
-        }
         #endregion
         #region Connect-DisconnectFunctions
         public void ConnectPressure()
         {
-            PressureController.Connect(PressureCom);
+            AutomationController.PressureController.Connect(PressureCom);
         }
         public void DisconnectPressure()
         {
-            PressureController.Disconnect();
+            AutomationController.PressureController.Disconnect();
         }
         public void ConnectStepper()
         {
-            StepperController.Connect(StepperCom);
+            AutomationController.StepperController.Connect(StepperCom);
         }
         public void DisconnectStepper()
         {
-            StepperController.Disconnect();
+            AutomationController.StepperController.Disconnect();
         }
         public void ConnectHotWire()
         {
@@ -111,29 +97,29 @@ namespace ViewModel
         #region Step Nudge
         public void StepLeft()
         {
-            if (StepperController.isBusy == false && StepperController.isConnected == true)
-                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
+            if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
+                AutomationController.StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepRight()
         {
-            if (StepperController.isBusy == false && StepperController.isConnected == true)
-                StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
+            if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
+                AutomationController.StepperController.sendCommand(MotorAxis.x, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         public void StepUp()
         {
-            if (StepperController.isBusy == false && StepperController.isConnected == true)
-                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
+            if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
+                AutomationController.StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
         }
         public void StepDown()
         {
-            if (StepperController.isBusy == false && StepperController.isConnected == true)
-                StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
+            if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
+                AutomationController.StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         #endregion
         #region Export
         public void ExportPressure(string FilePath)
         {
-            PressureController.ExportNiceData(FilePath);
+            AutomationController.PressureController.ExportNiceData(FilePath);
         }
         public void ExportHotWire(string FilePath)
         {
@@ -144,7 +130,7 @@ namespace ViewModel
         DispatcherTimer timer = new DispatcherTimer();
         private void UIUpdateTimer(object sender, EventArgs e)
         {
-            PressureController.TriggerUIUpdate(); // trigger a request to update the sensor values and graph data.
+            AutomationController.PressureController.TriggerUIUpdate(); // trigger a request to update the sensor values and graph data.
         }
 
 
@@ -156,32 +142,9 @@ namespace ViewModel
         }
         public void ExecuteMeasurementCycle()
         {
-            AutomationController.ExecuteAutomationProcess(this);
+            AutomationController.BeginWork();
         }
-        private int _CompletedMeasurementCount;
-        public int CompletedMeasurementCount
-        {
-            get
-            {
-                return _CompletedMeasurementCount;
-            }
-            set
-            {
-                this.SetField(ref _CompletedMeasurementCount, value, () => CompletedMeasurementCount);
-            }
-        }
-        private int _TotalMeasurementCount;
-        public int TotalMeasurementCount
-        {
-            get
-            {
-                return _TotalMeasurementCount;
-            }
-            set
-            {
-                this.SetField(ref _TotalMeasurementCount, value, () => TotalMeasurementCount);
-            }
-        }
+  
 
     }
 

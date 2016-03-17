@@ -19,7 +19,6 @@ namespace Shell
         {
             MenuViewModel VM = new MenuViewModel();
             UI.Menu MW = new UI.Menu(ref VM);
-            VM.AssignDispatcher(MW.Dispatcher);
             MW.ShowDialog();
 
         }
