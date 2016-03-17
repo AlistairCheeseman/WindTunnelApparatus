@@ -18,8 +18,8 @@ namespace ViewModel.SensorControllers
     public class StepperController : ViewModelBase
     {
         const int StepsPerRevolution = 200;
-        const double pitch = 1;
-        const double stepResolution = pitch / StepsPerRevolution;
+        const double pitchum = 1000;
+        const long stepResolutionum = (long) pitchum / StepsPerRevolution;
 
 
         SerialPort SP;
@@ -135,28 +135,46 @@ namespace ViewModel.SensorControllers
             }
         }
         #region position information
-        private double _xPosition = 0;
-        public double xPosition
+        public double xPositionmm
         {
             get
             {
-                return _xPosition;
+                return _xPositionum / 1000.0;
             }
-            private set // only let this class update the position
+
+        }
+        public double yPositionmm
+        {
+            get
             {
-                this.SetField(ref _xPosition, value, () => xPosition);
+                return _yPositionum / 1000.0;
+            }
+
+        }
+        public long _yPositionum = 0;
+        public long yPositionum
+        {
+            get
+            {
+                return _yPositionum;
+            }
+            private set
+            {
+                this.SetField(ref _yPositionum, value, () => yPositionum);
+                this.OnPropertyChanged("yPositionmm");
             }
         }
-        private double _yPosition = 0;
-        public double yPosition
+        public long _xPositionum = 0;
+        public long xPositionum
         {
             get
             {
-                return _yPosition;
+                return _xPositionum;
             }
-            private set // only let this class update the position
+            private set
             {
-                this.SetField(ref _yPosition, value, () => yPosition);
+                this.SetField(ref _xPositionum, value, () => xPositionum);
+                this.OnPropertyChanged("xPositionmm");
             }
         }
         #endregion
@@ -172,7 +190,7 @@ namespace ViewModel.SensorControllers
         }
 
 
-        public bool gotoHorizontal(double Horizontalmm)
+        public bool gotoHorizontal(long Horizontalum)
         {
             MotorDirection dir = MotorDirection.none;
             if (this.isBusy == true)
@@ -180,20 +198,20 @@ namespace ViewModel.SensorControllers
             else
             {
                 // get current position and calculate the number of steps needed to move.
-                double difference = Math.Abs(xPosition - Horizontalmm); // find the mm difference.
+                double difference = Math.Abs(xPositionum - Horizontalum) / 1000.0; // find the mm difference.
                 // find the direction
-                if (xPosition > Horizontalmm)
+                if (xPositionum > Horizontalum)
                     dir = MotorDirection.left;
                 else
                     dir = MotorDirection.right;
 
                 ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
-                byte steps = (byte)((difference - (double)Revs) / stepResolution); // get fraction of mm and divide by step resolution
+                byte steps = (byte)((difference - (double)Revs) / (stepResolutionum/1000.0)); // get fraction of mm and divide by step resolution
                 sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
                 return true;
             }
         }
-        public bool gotoVertical(double Verticalmm)
+        public bool gotoVertical(long Verticalum)
         {
             MotorDirection dir = MotorDirection.none;
             if (this.isBusy == true)
@@ -201,15 +219,15 @@ namespace ViewModel.SensorControllers
             else
             {
                 // get current position and calculate the number of steps needed to move.
-                double difference = Math.Abs(yPosition - Verticalmm); // find the mm difference.
+                double difference = Math.Abs(yPositionum - Verticalum) / 1000.0; // find the mm difference.
                 // find the direction
-                if (xPosition > Verticalmm)
+                if (yPositionum > Verticalum)
                     dir = MotorDirection.left;
                 else
                     dir = MotorDirection.right;
 
                 ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
-                byte steps = (byte)((difference - (double)Revs) / stepResolution); // get fraction of mm and divide by step resolution
+                byte steps = (byte)((difference - (double)Revs) / (stepResolutionum / 1000.0)); // get fraction of mm and divide by step resolution
                 sendCommand(MotorAxis.y, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
                 return true;
             }
@@ -223,29 +241,29 @@ namespace ViewModel.SensorControllers
             if (command == "XL\r\n" || command == "XR\r\n")
             {
                 if (command.Contains("L"))
-                    xPosition = xPosition - stepResolution;
+                    xPositionum = xPositionum - stepResolutionum;
                 else
-                    xPosition = xPosition + stepResolution;
+                    xPositionum = xPositionum + stepResolutionum;
             }
             else if (command == "YL\r\n" || command == "YR\r\n")
             {
                 if (command.Contains("L"))
-                    yPosition = yPosition - stepResolution;
+                    yPositionum = yPositionum - stepResolutionum;
                 else
-                    yPosition = yPosition + stepResolution;
+                    yPositionum = yPositionum + stepResolutionum;
             }
             else if (command == "STEPPER V1. ENTER CONFIG\r\n")
             {
-                SP.Write("2 65\r\n"); // give the max speed delay and the min speed delay
+                SP.Write("1.5 65\r\n"); // give the max speed delay and the min speed delay
             }
             else if (command == "ZEROING ALL AXES\r\n")
             {
-                xPosition = 0;
-                yPosition = 0;
+                xPositionum = 0;
+                yPositionum = 0;
             }
             else if (command == "OK WAIT\r\n")
             {
-                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.fast, MotorDirection.left, 6, 0, 0);
+                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.fast, MotorDirection.left, 0, 0, 0);
             }
             else if (command == "OK DONE\r\n")
             {
