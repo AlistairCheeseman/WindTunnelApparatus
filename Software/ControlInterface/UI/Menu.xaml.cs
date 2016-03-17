@@ -29,7 +29,7 @@ namespace UI
 
         private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            if (!((MenuViewModel)this.DataContext).PressureController.isConnected)
+            if (!((MenuViewModel)this.DataContext).AutomationController.PressureController.isConnected)
             {
                 ((MenuViewModel)this.DataContext).ConnectPressure();
             }
@@ -41,7 +41,7 @@ namespace UI
         }
         private void StepperConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            if (!((MenuViewModel)this.DataContext).StepperController.isConnected)
+            if (!((MenuViewModel)this.DataContext).AutomationController.StepperController.isConnected)
             {
                 ((MenuViewModel)this.DataContext).ConnectStepper();
             }
@@ -87,6 +87,32 @@ namespace UI
         private void StepDown_Click(object sender, RoutedEventArgs e)
         {
             ((MenuViewModel)this.DataContext).StepDown();
+        }
+
+        private void stimulusMenuBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // create and display the stimulus generator form.
+            UI.StimulusGenerator SG = new StimulusGenerator();
+            SG.ShowDialog();
+        }
+
+        private void LoadStimulusBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog OFD = new Microsoft.Win32.OpenFileDialog();
+            OFD.FileName = "";
+            OFD.DefaultExt = ".csv";
+            OFD.Filter = "Comma Separated Values (.csv)|*.csv";
+            if (OFD.ShowDialog() == false)
+            {
+                // succesful file selection.
+                MessageBox.Show("Couldn't access the stimulus file.");
+            }
+            ((MenuViewModel)this.DataContext).LoadStimulus(OFD.FileName);
+        }
+
+        private void GoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ((MenuViewModel)this.DataContext).ExecuteMeasurementCycle();
         }
     }
 }

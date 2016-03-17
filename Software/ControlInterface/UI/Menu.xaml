@@ -7,30 +7,35 @@
         mc:Ignorable="d"
         Title="Menu" Height="571.949" Width="635.282">
     <Grid>
-        <GroupBox x:Name="groupBox" Header="Motion control" HorizontalAlignment="Right" Height="143" Margin="0,164,10,0" VerticalAlignment="Top" Width="231">
+        <Menu x:Name="menu" Height="25" Margin="0,0,0,0" VerticalAlignment="Top" >
+            <MenuItem Header="Utils" >
+                <MenuItem Header="Stimulus Generator" x:Name="stimulusMenuBtn" Click="stimulusMenuBtn_Click" />
+            </MenuItem>
+        </Menu>
+
+        <GroupBox x:Name="groupBox" Header="Motion control" HorizontalAlignment="Right" Height="100" Margin="0,164,10,0" VerticalAlignment="Top" Width="252" Background="GhostWhite">
             <Grid>
                 <GroupBox Header="Current Position" Margin="108,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     <StackPanel >
                         <StackPanel Orientation="Horizontal">
                             <TextBlock   Text="x:" />
-                            <TextBlock Text="{Binding StepperController.xPosition}" />
+                            <TextBlock Text="{Binding AutomationController.StepperController.xPositionmm, StringFormat=\{0:F3\}}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock   Text="y:" />
-                            <TextBlock Text="{Binding StepperController.yPosition}" />
+                            <TextBlock Text="{Binding AutomationController.StepperController.yPositionmm, StringFormat=\{0:F3\}}" />
                         </StackPanel>
-                        <TextBlock  IsEnabled="False" Text="r:  0.0deg" />
                     </StackPanel>
                 </GroupBox>
                 <Button  Content="&#x25B2;" HorizontalAlignment="Left" Margin="30,10,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepUp_Click"/>
-                <Button  Content="&#x21B6;" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/>
+                <!-- <Button  Content="&#x21B6;" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/> -->
                 <Button  Content="&#x25C0;" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepLeft_Click"/>
                 <Button  Content="&#x25BC;" HorizontalAlignment="Left" Margin="30,50,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepDown_Click"/>
-                <Button  Content="&#x21B7;" HorizontalAlignment="Left" Margin="50,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/>
+                <!--  <Button  Content="&#x21B7;" HorizontalAlignment="Left" Margin="50,72,0,0" VerticalAlignment="Top" Width="20" Height="20" IsEnabled="False"/> -->
                 <Button  Content="&#x25B6;" HorizontalAlignment="Left" Margin="50,30,0,0" VerticalAlignment="Top" Width="20" Height="20" Click="StepRight_Click"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Modules" Margin="10,10,10,0" VerticalAlignment="Top" Height="127">
+        <GroupBox Header="Modules" Margin="8,22,12,0" VerticalAlignment="Top" Height="127">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100*" />
@@ -57,8 +62,8 @@
 
 
                 <TextBlock Grid.Column="1" Grid.Row="1"  />
-                <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding PressureController.ConnectionState}"/>
-                <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding StepperController.ConnectionState}" />
+                <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding AutomationController.PressureController.ConnectionState}"/>
+                <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding AutomationController.StepperController.ConnectionState}" />
                 <Button Grid.Column="2" Grid.Row="1" Content="Connect" Click="HotWireConnectDisconnect_Click"/>
                 <Button Grid.Column="2" Grid.Row="2" Content="Connect" Click="PressureConnectDisconnect_Click"/>
                 <Button Grid.Column="2" Grid.Row="3" Content="Connect" Click="StepperConnectDisconnect_Click"/>
@@ -74,7 +79,7 @@
 
 
         </GroupBox>
-        <GroupBox Header="Current Readings" Margin="10,164,0,10" HorizontalAlignment="Left" Width="350" >
+        <GroupBox Header="Current Readings" Margin="10,164,0,10" HorizontalAlignment="Left" Width="350" Background="GhostWhite" >
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -95,31 +100,48 @@
 
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Hot Wire" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding HotWireController.CurrentHotWireReading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AutomationController.HotWireController.CurrentHotWireReading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="1" Text="Pressure 1" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PressureController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="2" Text="Pressure 2"  />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PressureController.CurrentSensor2Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor2Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="3" Text="Pressure 3" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding PressureController.CurrentSensor3Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor3Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="4" Text="Pressure 4" />
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PressureController.CurrentSensor4Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor4Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="5" Text="Pressure 5" />
-                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PressureController.CurrentSensor5Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor5Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="6" Text="Pressure 6" />
-                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PressureController.CurrentSensor6Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor6Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="7" Text="Pressure 7" />
-                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding PressureController.CurrentSensor7Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor7Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="8" Text="Pressure 8" />
-                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding PressureController.CurrentSensor8Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor8Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="9" Text="Pressure 9" />
-                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding PressureController.CurrentSensor9Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor9Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="10" Text="Pressure 10" />
-                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding PressureController.CurrentSensor10Reading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor10Reading, StringFormat=\{0:F2\}}" />
 
 
             </Grid>
         </GroupBox>
 
+
+        <GroupBox Header="Stimulus" Margin="0,269,10,67" Background="GhostWhite" HorizontalAlignment="Right" Width="252" >
+            <Grid>
+                <Button Content="Load Stimulus file" Margin="10,10,51,133" x:Name="LoadStimulusBtn" Click="LoadStimulusBtn_Click" />
+                <StackPanel Margin="10,63,10,69">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Completed Measurements:" />
+                        <TextBlock Text="{Binding AutomationController.CompletedMeasurementCount}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Total Measurements:" />
+                        <TextBlock Text="{Binding AutomationController.TotalMeasurementCount}" />
+                    </StackPanel>
+                </StackPanel>
+                <Button Content="GO!!" Margin="10,119,10,10" x:Name="GoBtn" Click="GoBtn_Click"/>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
