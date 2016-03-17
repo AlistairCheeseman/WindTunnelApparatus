@@ -36,6 +36,7 @@ namespace ViewModel
         //controllers
         public PressureController PressureController { get; } = new PressureController();
         public StepperController StepperController { get; } = new StepperController();
+        public AutomationController AutomationController { get; } = new AutomationController();
 
         public void AssignDispatcher(Dispatcher dispatcher)
         {
@@ -148,6 +149,40 @@ namespace ViewModel
 
 
         #endregion
+
+        public void LoadStimulus(string FilePath) // load the stimulus file and process it ready for the exectuion.
+        {
+            AutomationController.loadStimulusFile(FilePath, this);
+        }
+        public void ExecuteMeasurementCycle()
+        {
+            AutomationController.ExecuteAutomationProcess(this);
+        }
+        private int _CompletedMeasurementCount;
+        public int CompletedMeasurementCount
+        {
+            get
+            {
+                return _CompletedMeasurementCount;
+            }
+            set
+            {
+                this.SetField(ref _CompletedMeasurementCount, value, () => CompletedMeasurementCount);
+            }
+        }
+        private int _TotalMeasurementCount;
+        public int TotalMeasurementCount
+        {
+            get
+            {
+                return _TotalMeasurementCount;
+            }
+            set
+            {
+                this.SetField(ref _TotalMeasurementCount, value, () => TotalMeasurementCount);
+            }
+        }
+
     }
 
 
