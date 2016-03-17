@@ -40,7 +40,7 @@ namespace ViewModel.SensorControllers
         }
 
         #region Data container + helpers
-        List<PressureData> OutputData = new List<PressureData>();
+        public List<PressureData> OutputData = new List<PressureData>();
         public double CurrentSensor1Reading
         { get; private set; } = 0;
         public double CurrentSensor2Reading
