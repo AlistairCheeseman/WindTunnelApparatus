@@ -192,6 +192,8 @@ void loop() {
   steps = command[6];
   uint64_t totalStep = 0;
   totalStep = (revs * 200) + steps;
+  if (totalStep != 0) 
+  {
   if (command[0] == 0x1) // motorX
   {
     if (command[3] == 0x1) // LEFT
@@ -265,6 +267,7 @@ void loop() {
       delay(command[7]);
     }
     stopMotorY();
+  }
   }
   Serial.println("OK DONE");
 }
