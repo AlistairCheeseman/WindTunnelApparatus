@@ -1,0 +1,59 @@
+﻿<Window x:Class="UI.StimulusGenerator"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        mc:Ignorable="d"
+        Title="StimulusGenerator" Height="583.808" Width="417.613">
+    <Grid>
+        <StackPanel MinHeight="500">
+            <TextBlock Text="Horizontal Min: "/>
+            <TextBox Margin="5" x:Name="horizontalminTxt" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Horizontal Max: "/>
+            <TextBox x:Name="horizontalmaxTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Vertical Min: "/>
+            <TextBox x:Name="verticalminTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Vertical Max: "/>
+            <TextBox x:Name="verticalmaxTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Period to measure at each coordinate (ms)" />
+            <TextBox x:Name="PeriodTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Step (%)" />
+            <TextBox x:Name="StepTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+
+
+
+
+            <GroupBox Header="Scanning Method" Margin="5">
+                <StackPanel>
+
+
+                    <RadioButton Padding="5" x:Name="RasterVerticalOption">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Raster (Vertical)" />
+                            <Image Source="/UI;component/Resources/raster.png" Height="95" Width="117" RenderTransformOrigin="0.5,0.5" >
+                                <Image.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleY="1" ScaleX="-1"/>
+                                        <SkewTransform AngleY="0" AngleX="0"/>
+                                        <RotateTransform Angle="-270"/>
+                                        <TranslateTransform/>
+                                    </TransformGroup>
+                                </Image.RenderTransform>
+                            </Image>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Padding="5" x:Name="RasterHorizontalOption">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Raster (Horizontal)    "     />
+                            <Image Source="/UI;component/Resources/raster.png" Height="95" Width="117" />
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+            </GroupBox>
+            <Button Content="GENERATE" FontWeight="Bold" x:Name="GenerateBtn" Click="GenerateBtn_Click"/>
+        </StackPanel>
+
+    </Grid>
+</Window>
