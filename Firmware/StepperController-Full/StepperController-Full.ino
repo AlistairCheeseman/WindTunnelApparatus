@@ -110,9 +110,15 @@ void stepX()
 {
   //  Simply shift output.
   if (dirX == DIR_LEFT)
+  {
     stepStatusX = fourBitShiftLeft(stepStatusX);
+    Serial.println("XL");
+  }
   else
+  {
     stepStatusX = fourBitShiftRight(stepStatusX);
+    Serial.println("XR");
+  }
   // and output the new motor poles
   digitalWrite(XM1, (stepStatusX & 0B1000) >> 3);
   digitalWrite(XM2, (stepStatusX & 0B0100) >> 2);
@@ -123,9 +129,15 @@ void stepY()
 {
   // Simply shift output.
   if (dirY == DIR_LEFT)
+  {
     stepStatusY = fourBitShiftLeft(stepStatusY);
+    Serial.println("YL");
+  }
   else
+  {
     stepStatusY = fourBitShiftRight(stepStatusY);
+    Serial.println("YR");
+  }
   // output the new motor state
   digitalWrite(YM1, (stepStatusY & 0B1000) >> 3);
   digitalWrite(YM2, (stepStatusY & 0B0100) >> 2);
@@ -280,6 +292,5 @@ void longDelay(uint16_t usDelay) // the arduino delayMicros has a massive bug wh
   uint16_t microsCount = usDelay % 1000;// get number of micros, by finding remainder when dividing by 1ms.
   delay(millisCount);
   delayMicroseconds(microsCount);
-  
 }
 
