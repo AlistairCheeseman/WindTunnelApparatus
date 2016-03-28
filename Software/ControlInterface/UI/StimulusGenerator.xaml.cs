@@ -63,7 +63,7 @@ namespace UI
                 return;
             }
 
-
+            int StepCount = (int)(100.0 / stepDistance) + 1;
             double ActualStepHorizontal = (Math.Abs(horizontalmin - horizontalmax)) * (stepDistance / 100); // get the distance from zero and add together, then * by the % step. 
             double ActualStepVertical = (Math.Abs(verticalmin - verticalmax)) * (stepDistance / 100); // get the distance from zero and add together, then * by the % step. 
 
@@ -74,11 +74,13 @@ namespace UI
             // intialise to the top left hand corner.
             Horizontal = horizontalmin;
             Vertical = verticalmax + ActualStepVertical;
+         
+
             if (RasterVerticalOption.IsChecked == true)
             {
-                for (int t = 1; t <= 11; t++)
+                for (int t = 1; t <= StepCount; t++)
                 {
-                    for (int u = 1; u <= 11; u++)
+                    for (int u = 1; u <= StepCount; u++)
                     {
                         Vertical = Vertical - ActualStepVertical;
                         SB.AppendLine(string.Format("{0},{1},{2},{3}", id, Horizontal, Vertical, stepTime));
@@ -90,9 +92,9 @@ namespace UI
             }
             else if (RasterVerticalOption.IsChecked == true)
             {
-                for (int t = 1; t <= 11; t++)
+                for (int t = 1; t <= StepCount; t++)
                 {
-                    for (int u = 1; u <= 11; u++)
+                    for (int u = 1; u <= StepCount; u++)
                     {
                         Horizontal = Horizontal + ActualStepHorizontal;
                         SB.AppendLine(string.Format("{0},{1},{2},{3}", id, Horizontal, Vertical, stepTime));
