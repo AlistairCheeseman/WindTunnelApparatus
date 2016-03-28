@@ -24,8 +24,19 @@ namespace UI
         {
             InitializeComponent();
             this.DataContext = viewModel;
+            viewModel.AutomationCompletedEvent += ViewModel_AutomationCompletedEvent;
         }
 
+        private void ViewModel_AutomationCompletedEvent()
+        { // the automation is completed. prompt to ask for save location.
+            MessageBox.Show("Measurement Completed!");
+            Microsoft.Win32.SaveFileDialog SFD = new Microsoft.Win32.SaveFileDialog();
+            SFD.FileName = "AutomationExport";
+            SFD.DefaultExt = ".csv";
+            SFD.Filter = "Comma Separated Values (.csv)|*.csv";
+            SFD.ShowDialog();
+            ((MenuViewModel)this.DataContext).ExportAll(SFD.FileName);
+        }
 
         private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
@@ -52,7 +63,14 @@ namespace UI
         }
         private void HotWireConnectDisconnect_Click(object sender, RoutedEventArgs e)
         {
-
+            if (!((MenuViewModel)this.DataContext).AutomationController.HotWireController.isConnected)
+            {
+                ((MenuViewModel)this.DataContext).ConnectHotWire();
+            }
+            else
+            {
+                ((MenuViewModel)this.DataContext).DisconnectHotWire();
+            }
         }
         private void HotWireExport_Click(object sender, RoutedEventArgs e)
         {
@@ -107,7 +125,10 @@ namespace UI
                 // succesful file selection.
                 MessageBox.Show("Couldn't access the stimulus file.");
             }
-            ((MenuViewModel)this.DataContext).LoadStimulus(OFD.FileName);
+            else
+            {
+                ((MenuViewModel)this.DataContext).LoadStimulus(OFD.FileName);
+            }
         }
 
         private void GoBtn_Click(object sender, RoutedEventArgs e)
