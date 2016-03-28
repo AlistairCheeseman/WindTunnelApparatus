@@ -70,6 +70,7 @@ void setup() {
   // zero the aixs
   Serial.println("ZEROING ALL AXES");
   zero();
+  Serial.println("ZEROED");
   // tell the program we are ready to take commands
   while (Serial.available() != 0) {
     Serial.read(); // make sure serial buffer is empty.

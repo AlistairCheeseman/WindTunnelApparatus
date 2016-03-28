@@ -256,7 +256,7 @@ namespace ViewModel.SensorControllers
             {
                 SP.Write("1.5 65\r\n"); // give the max speed delay and the min speed delay
             }
-            else if (command == "ZEROING ALL AXES\r\n")
+            else if (command == "ZEROED\r\n")
             {
                 xPositionum = 0;
                 yPositionum = 0;
