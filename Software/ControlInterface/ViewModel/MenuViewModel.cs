@@ -27,7 +27,19 @@ namespace ViewModel
             timer.Tick += UIUpdateTimer; // Timer to update UI information
             timer.Interval = new TimeSpan(0, 0, 0, 0,500); //tick every 500ms
             timer.Start();
+            this.AutomationController.AutomationCompletedEvent += AutomationController_AutomationCompletedEvent;
         }
+
+        private void AutomationController_AutomationCompletedEvent()
+        {
+            // the automation controller has completed the measurement portion, it now just needs to display a prompt to ask the user where to save the results.
+            // pass the event up to the UI!
+            if (AutomationCompletedEvent != null)
+                AutomationCompletedEvent();
+            else
+                Console.WriteLine("UI is not listening to automation completed events.");
+        }
+
         public AutomationController AutomationController { get; } = new AutomationController();
         #endregion
         #region Connect-DisconnectFunctions
@@ -125,6 +137,10 @@ namespace ViewModel
         {
             
         }
+        public void ExportAll(string FilePath)
+        {
+            AutomationController.ExportData(FilePath);
+        }
         #endregion
         #region UI Timing
         DispatcherTimer timer = new DispatcherTimer();
@@ -144,8 +160,11 @@ namespace ViewModel
         {
             AutomationController.BeginWork();
         }
-  
 
+        #region events
+        public delegate void AutomationCompleted();
+        public event AutomationCompleted AutomationCompletedEvent;
+        #endregion
     }
 
 
