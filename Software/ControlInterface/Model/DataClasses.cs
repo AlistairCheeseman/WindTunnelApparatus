@@ -40,6 +40,44 @@ namespace Model
         public int sensorId { get; set; }
         public DateTime moment { get; set; }
     }
+    /* Hot Wire Data container - very basic data due to the analog nature of the device. */
+    public class HotWireData
+    {
+        public HotWireData(long id, double measurement, DateTime moment)
+        {
+            this.id = id;
+            this.measurement = measurement;
+            this.moment = moment;
+        }
+        public long id { get; set; }
+        public double measurement { get; set; }
+        public DateTime moment { get; set; }
+    }
+    /* container to hold the measurements for a set position */
+    public class AutomationMeasurement
+    {
+        public AutomationMeasurement(long _id, double _posnHoriz, double _posnVert, List<PressureData> _pressure, List<HotWireData> _hotWire)
+        {
+            this.id = _id;
+            this.PosnHoriz = _posnHoriz;
+            this.PosnVert = _posnVert;
+            this.PressureReadings = _pressure;
+            this.HotWireReadings = _hotWire;
+        }
+        public List<PressureData> PressureReadings { get; set; }
+        public List<HotWireData> HotWireReadings { get; set; }
+        public double PosnHoriz { get; set; }
+        public double PosnVert { get; set; }
+        public long id { get; set; }
 
+    }
+    /* this class holds the list of positions to autoamtically measure, how long to measure etc */
+    public class Measurement
+    {
+        public int id;
+        public double Vertical;
+        public double Horizontal;
+        public double MeasurementTime;
+    }
 
 }
