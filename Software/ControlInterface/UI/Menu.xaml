@@ -61,7 +61,7 @@
                 <TextBlock Grid.Row="3" Text="Stepper Controller"  VerticalAlignment="Center" Height="16" Margin="0,6,0,5" />
 
 
-                <TextBlock Grid.Column="1" Grid.Row="1"  />
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding AutomationController.HotWireController.ConnectionState}" />
                 <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding AutomationController.PressureController.ConnectionState}"/>
                 <TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding AutomationController.StepperController.ConnectionState}" />
                 <Button Grid.Column="2" Grid.Row="1" Content="Connect" Click="HotWireConnectDisconnect_Click"/>
@@ -100,7 +100,7 @@
 
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Hot Wire" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AutomationController.HotWireController.CurrentHotWireReading, StringFormat=\{0:F2\}}" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AutomationController.HotWireController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="1" Text="Pressure 1" />
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AutomationController.PressureController.CurrentSensor1Reading, StringFormat=\{0:F2\}}" />
                 <TextBlock Grid.Row="2" Text="Pressure 2"  />
