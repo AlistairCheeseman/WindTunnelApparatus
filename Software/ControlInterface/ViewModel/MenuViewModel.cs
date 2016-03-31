@@ -61,11 +61,11 @@ namespace ViewModel
         }
         public void ConnectHotWire()
         {
-
+            AutomationController.HotWireController.Connect(HotWireCom);
         }
         public void DisconnectHotWire()
         {
-
+            AutomationController.HotWireController.Disconnect();
         }
         #endregion
         #region COM Port settings.
@@ -135,7 +135,7 @@ namespace ViewModel
         }
         public void ExportHotWire(string FilePath)
         {
-            
+            AutomationController.HotWireController.Export(FilePath);
         }
         public void ExportAll(string FilePath)
         {
@@ -147,6 +147,7 @@ namespace ViewModel
         private void UIUpdateTimer(object sender, EventArgs e)
         {
             AutomationController.PressureController.TriggerUIUpdate(); // trigger a request to update the sensor values and graph data.
+            AutomationController.HotWireController.TriggerUIUpdate();
         }
 
 
