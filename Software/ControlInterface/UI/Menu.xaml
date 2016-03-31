@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI"
         mc:Ignorable="d"
-        Title="Menu" Height="571.949" Width="635.282">
+        Title="Menu" Height="571.949" Width="730.282">
     <Grid>
         <Menu x:Name="menu" Height="25" Margin="0,0,0,0" VerticalAlignment="Top" >
             <MenuItem Header="Utils" >
@@ -43,7 +43,7 @@
                     <ColumnDefinition Width="62*" />
                     <ColumnDefinition Width="97*" />
                     <ColumnDefinition Width="79*" />
-
+                    <ColumnDefinition Width="79*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
@@ -55,6 +55,7 @@
                 <TextBlock Grid.Column="1"  Text="Status" HorizontalAlignment="Center" Margin="12,0,14,0" Width="32" />
                 <TextBlock Grid.Column="3"   Text="Connection Port"/>
 
+                <TextBlock Grid.Column="5" Text="Queue Status" />
 
                 <TextBlock Grid.Row="1" Text="Hot Wire Sensor" VerticalAlignment="Center" Height="16" Margin="0,5" />
                 <TextBlock Grid.Row="2" Text="Pressure Array"  VerticalAlignment="Center" Height="16" Margin="0,5"  />
@@ -75,6 +76,21 @@
 
                 <Button Grid.Column="4" Grid.Row="1" Content="Export" Click="HotWireExport_Click"/>
                 <Button Grid.Column="4" Grid.Row="2" Content="Export" Click="PressureExport_Click"/>
+
+                <StackPanel Orientation="Horizontal"  Grid.Column="5" Grid.Row="1" >
+                    <TextBlock Text="{Binding AutomationController.HotWireController.SerialQueueCount}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding AutomationController.HotWireController.BytesQueueCount}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding AutomationController.HotWireController.PacketQueueCount}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"  Grid.Column="5" Grid.Row="2" >
+                    <TextBlock Text="{Binding AutomationController.PressureController.SerialQueueCount}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding AutomationController.PressureController.BytesQueueCount}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{Binding AutomationController.PressureController.PacketQueueCount}" />
+                </StackPanel>
             </Grid>
 
 
