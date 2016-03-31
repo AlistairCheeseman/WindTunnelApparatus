@@ -303,8 +303,6 @@ namespace ViewModel.SensorControllers
                 SP.PortName = ComPort;
                 SP.Open();
                 FS = System.IO.File.OpenWrite("PressureLog" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".dat");
-                // let some data gather before we add the event handler
-
                 if (SP.IsOpen == true)
                 {
                     isConnected = true;
@@ -315,7 +313,6 @@ namespace ViewModel.SensorControllers
                     isConnected = false;
                     Console.WriteLine("Could not open serial port.");
                 }
-
             }
             catch (Exception)
             {
@@ -462,7 +459,6 @@ namespace ViewModel.SensorControllers
             this.OnPropertyChanged("SerialQueueCount");
             this.OnPropertyChanged("BytesQueueCount");
             this.OnPropertyChanged("PacketQueueCount");
-            Console.Write(String.Format( "\rSerial Queue: {0} BytesQueue: {1}, PacketQueue: {2}",SerialQueueCount.ToString().PadRight(25), BytesQueueCount.ToString().PadRight(25), PacketQueueCount.ToString().PadRight(25)));
         }
 
         public void ClearBuffer()
