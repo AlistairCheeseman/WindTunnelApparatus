@@ -18,7 +18,7 @@
             <TextBox x:Name="verticalmaxTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
             <TextBlock Text="Period to measure at each coordinate (ms)" />
             <TextBox x:Name="PeriodTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
-            <TextBlock Text="Time to wait for flow to settle" />
+            <TextBlock Text="Time to wait for flow to settle (s)" />
             <TextBox x:Name="SettleDurationTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
             <TextBlock Text="Step (%)" />
             <TextBox x:Name="StepTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
