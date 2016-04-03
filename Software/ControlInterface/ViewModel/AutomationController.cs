@@ -72,7 +72,8 @@ namespace ViewModel
                     double Horizontal = double.Parse(rows[1]);
                     double Vertical = double.Parse(rows[2]);
                     double MeasurementTime = double.Parse(rows[3]);
-                    MeasurementList.Add(new Measurement() { id = ID, Horizontal = Horizontal, Vertical = Vertical, MeasurementTime = MeasurementTime });
+                    double _SettleTime = double.Parse(rows[4]);
+                    MeasurementList.Add(new Measurement() { id = ID, Horizontal = Horizontal, Vertical = Vertical, MeasurementTime = MeasurementTime, SettleTime = _SettleTime });
 
                 }
                 TotalMeasurementCount = MeasurementList.Count();
@@ -164,36 +165,41 @@ namespace ViewModel
                     e.Cancel = true;
                     return; // quit out of the worker process.
                 }
-                while (StepperController.isBusy == true)
-                { 
-                    System.Threading.Thread.Sleep(1000);
-                } // be sure controller is free before we do anything.
-
-
-                // move to X posn.
-                if (StepperController.gotoHorizontal((long)(mes.Horizontal * 1000.0)) == false)
+                if (StepperController.isConnected == true)
                 {
-                    // error
-                    Console.WriteLine("Horizontal Error");
-                }
-                while (StepperController.isBusy == true)
-                {
-                    System.Threading.Thread.Sleep(1000);
-                }
-
-                //move to Y posn
-                if (StepperController.gotoVertical((long)(mes.Vertical * 1000.0)) == false)
-                {
-                    // error
-                    Console.WriteLine("Vertical Error");
-                }
-                while (StepperController.isBusy == true)
-                {
-                    System.Threading.Thread.Sleep(1000);
-                }
+                    while (StepperController.isBusy == true)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    } // be sure controller is free before we do anything.
 
 
-                System.Threading.Thread.Sleep(new TimeSpan(0, 0, 5)); // wait 5 seconds for flow to settle.
+                    // move to X posn.
+                    if (StepperController.gotoHorizontal((long)(mes.Horizontal * 1000.0)) == false)
+                    {
+                        // error
+                        Console.WriteLine("Horizontal Error");
+                    }
+                    while (StepperController.isBusy == true)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
+
+                    //move to Y posn
+                    if (StepperController.gotoVertical((long)(mes.Vertical * 1000.0)) == false)
+                    {
+                        // error
+                        Console.WriteLine("Vertical Error");
+                    }
+                    while (StepperController.isBusy == true)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                }
+
+                int seconds = (int)mes.SettleTime;
+                int milliseconds = (int)((mes.SettleTime % 1) * 1000.0);
+
+                System.Threading.Thread.Sleep(new TimeSpan(0, 0,0,seconds, milliseconds)); // wait for flow to settle.
                 PressureController.OutputData.Clear(); // clear out the data .
                 HotWireController.OutputData.Clear();
                 System.Threading.Thread.Sleep(new TimeSpan((long)(mes.MeasurementTime * 10.0))); // wait for the appropriate sample time.
