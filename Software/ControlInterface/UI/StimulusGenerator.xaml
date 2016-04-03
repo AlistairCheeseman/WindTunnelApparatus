@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI"
         mc:Ignorable="d"
-        Title="StimulusGenerator" Height="583.808" Width="417.613">
+        Title="StimulusGenerator" Height="609.846" Width="417.613">
     <Grid>
         <StackPanel MinHeight="500">
             <TextBlock Text="Horizontal Min: "/>
@@ -18,6 +18,8 @@
             <TextBox x:Name="verticalmaxTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
             <TextBlock Text="Period to measure at each coordinate (ms)" />
             <TextBox x:Name="PeriodTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="Time to wait for flow to settle" />
+            <TextBox x:Name="SettleDurationTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
             <TextBlock Text="Step (%)" />
             <TextBox x:Name="StepTxt" Margin="5" MinWidth="250" HorizontalAlignment="Left"/>
 
