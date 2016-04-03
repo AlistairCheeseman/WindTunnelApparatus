@@ -31,7 +31,7 @@ namespace UI
         private void GenerateBtn_Click(object sender, RoutedEventArgs e)
         {
             // this should be moved to a view model but as this is so simple no need to overcomplicate.
-            double horizontalmin, horizontalmax, verticalmin, verticalmax, stepTime, stepDistance;
+            double horizontalmin, horizontalmax, verticalmin, verticalmax, settleTime, stepDistance, measurementDuration;
             if (double.TryParse(horizontalminTxt.Text, out horizontalmin) == false)
             {
                 MessageBox.Show("Error parsing horizontal min, please check that only numbers are present.");
@@ -52,9 +52,14 @@ namespace UI
                 MessageBox.Show("Error parsing vertical max, please check that only numbers are present.");
                 return;
             }
-            if (double.TryParse(PeriodTxt.Text, out stepTime) == false)
+            if (double.TryParse(PeriodTxt.Text, out measurementDuration) == false)
             {
                 MessageBox.Show("Error parsing measurement period, please check that only numbers are present.");
+                return;
+            }
+            if (double.TryParse(SettleDurationTxt.Text, out settleTime) == false)
+            {
+                MessageBox.Show("Cannot parse settle time.");
                 return;
             }
             if (double.TryParse(StepTxt.Text, out stepDistance) == false)
@@ -68,7 +73,7 @@ namespace UI
             double ActualStepVertical = (Math.Abs(verticalmin - verticalmax)) * (stepDistance / 100); // get the distance from zero and add together, then * by the % step. 
 
             StringBuilder SB = new StringBuilder();
-            SB.AppendLine("id, Horizontal,Vertical,Time");
+            SB.AppendLine("id, Horizontal,Vertical,Measurement Duration,SettleTime");
             long id = 0;
             double Horizontal, Vertical;
             // intialise to the top left hand corner.
@@ -83,7 +88,7 @@ namespace UI
                     for (int u = 1; u <= StepCount; u++)
                     {
                         Vertical = Vertical - ActualStepVertical;
-                        SB.AppendLine(string.Format("{0},{1},{2},{3}", id, Horizontal, Vertical, stepTime));
+                        SB.AppendLine(string.Format("{0},{1},{2},{3},{4}", id, Horizontal, Vertical, measurementDuration, settleTime));
                         id++;
                     }
                     Horizontal = Horizontal + ActualStepHorizontal;
@@ -97,7 +102,7 @@ namespace UI
                     for (int u = 1; u <= StepCount; u++)
                     {
                         Horizontal = Horizontal + ActualStepHorizontal;
-                        SB.AppendLine(string.Format("{0},{1},{2},{3}", id, Horizontal, Vertical, stepTime));
+                        SB.AppendLine(string.Format("{0},{1},{2},{3},{4}", id, Horizontal, Vertical, measurementDuration, settleTime));
                         id++;
                     }
                     Vertical = Vertical - ActualStepVertical;
