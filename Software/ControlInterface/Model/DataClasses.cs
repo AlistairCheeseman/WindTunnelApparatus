@@ -78,6 +78,7 @@ namespace Model
         public double Vertical;
         public double Horizontal;
         public double MeasurementTime;
+        public double SettleTime;
     }
     /* Pressure Exporter class */
     public class PressureExportData
