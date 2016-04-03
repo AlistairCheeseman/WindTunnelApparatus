@@ -337,94 +337,12 @@ namespace ViewModel.SensorControllers
             ArrayQueue.CompleteAdding(); // lock down the serial queue, causing the serial worker to finish what data is left in the queue.
 
         }
-        class ExportData
-        {
-            public int id;
-            public DateTime moment;
-            public double Pressure1;
-            public double Temperature1;
-            public double Pressure2;
-            public double Temperature2;
-            public double Pressure3;
-            public double Temperature3;
-            public double Pressure4;
-            public double Temperature4;
-            public double Pressure5;
-            public double Temperature5;
-            public double Pressure6;
-            public double Temperature6;
-            public double Pressure7;
-            public double Temperature7;
-            public double Pressure8;
-            public double Temperature8;
-            public double Pressure9;
-            public double Temperature9;
-            public double Pressure10;
-            public double Temperature10;
-        }
         public void ExportNiceData(string FilePath)
         {
-            IOrderedEnumerable<PressureData> DataList = OutputData.OrderBy(x => x.id); // export ordered Data.
-            List<ExportData> Exportdata = new List<ExportData>();
-            StringBuilder SB = new StringBuilder();
+           StringBuilder SB = new StringBuilder();
             SB.Append("id, Time, Value1(Pa), Temperature1(C), Value2(Pa), Temperature2(C), Value3(Pa), Temperature3(C), Value4(Pa), Temperature4(C), Value5(Pa), Temperature5(C), Value6(Pa), Temperature6(C), Value7(Pa), Temperature7(C), Value8(Pa), Temperature8(C), Value9(Pa), Temperature9(C), Value10(Pa), Temperature10(C)\r\n");
-            int t = 0;
-            ExportData record = null;
-            foreach (PressureData data in DataList)
-            {   
-                switch (data.sensorId)
-                {
-                    case 1:
-                        if (record != null)
-                            Exportdata.Add(record);
-                        record = new ExportData();
-                        record.id = t;
-                        t++;
-                        record.moment = data.moment;
-                        record.Pressure1 = data.Pressure;
-                        record.Temperature1 = data.Temperature;
-                        break;
-                    case 2:
-                        record.Pressure2 = data.Pressure;
-                        record.Temperature2 = data.Temperature;
-                        break;
-                    case 3:
-                        record.Pressure3 = data.Pressure;
-                        record.Temperature3 = data.Temperature;
-                        break;
-                    case 4:
-                        record.Pressure4 = data.Pressure;
-                        record.Temperature4 = data.Temperature;
-                        break;
-                    case 5:
-                        record.Pressure5 = data.Pressure;
-                        record.Temperature5 = data.Temperature;
-                        break;
-                    case 6:
-                        record.Pressure6 = data.Pressure;
-                        record.Temperature6 = data.Temperature;
-                        break;
-                    case 7:
-                        record.Pressure7 = data.Pressure;
-                        record.Temperature7 = data.Temperature;
-                        break;
-                    case 8:
-                        record.Pressure8 = data.Pressure;
-                        record.Temperature8 = data.Temperature;
-                        break;
-                    case 9:
-                        record.Pressure9 = data.Pressure;
-                        record.Temperature9 = data.Temperature;
-                        break;
-                    case 10:
-                        record.Pressure10 = data.Pressure;
-                        record.Temperature10 = data.Temperature;
-                        break;
-                }
-              }
-            if (record != null)
-                Exportdata.Add(record);
-            foreach (ExportData ED in Exportdata)
+            List<PressureExportData> Exportdata =  getExportData(OutputData); 
+            foreach (PressureExportData ED in Exportdata)
             {
                 SB.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20}, {21}\r\n",
                 ED.id, ED.moment,
@@ -472,6 +390,75 @@ namespace ViewModel.SensorControllers
             }
         }
         #endregion
+
+
+
+
+
+
+        public static List<PressureExportData> getExportData(List<PressureData> _DataIn)
+        {
+            IOrderedEnumerable<PressureData> DataList = _DataIn.OrderBy(x => x.id); // export ordered Data.
+            List<PressureExportData> Exportdata = new List<PressureExportData>();
+            int t = 0;
+            PressureExportData record = null;
+            foreach (PressureData data in DataList)
+            {
+                switch (data.sensorId)
+                {
+                    case 1:
+                        if (record != null)
+                            Exportdata.Add(record);
+                        record = new PressureExportData();
+                        record.id = t;
+                        t++;
+                        record.moment = data.moment;
+                        record.Pressure1 = data.Pressure;
+                        record.Temperature1 = data.Temperature;
+                        break;
+                    case 2:
+                        record.Pressure2 = data.Pressure;
+                        record.Temperature2 = data.Temperature;
+                        break;
+                    case 3:
+                        record.Pressure3 = data.Pressure;
+                        record.Temperature3 = data.Temperature;
+                        break;
+                    case 4:
+                        record.Pressure4 = data.Pressure;
+                        record.Temperature4 = data.Temperature;
+                        break;
+                    case 5:
+                        record.Pressure5 = data.Pressure;
+                        record.Temperature5 = data.Temperature;
+                        break;
+                    case 6:
+                        record.Pressure6 = data.Pressure;
+                        record.Temperature6 = data.Temperature;
+                        break;
+                    case 7:
+                        record.Pressure7 = data.Pressure;
+                        record.Temperature7 = data.Temperature;
+                        break;
+                    case 8:
+                        record.Pressure8 = data.Pressure;
+                        record.Temperature8 = data.Temperature;
+                        break;
+                    case 9:
+                        record.Pressure9 = data.Pressure;
+                        record.Temperature9 = data.Temperature;
+                        break;
+                    case 10:
+                        record.Pressure10 = data.Pressure;
+                        record.Temperature10 = data.Temperature;
+                        break;
+                }
+            }
+            if (record != null)
+                Exportdata.Add(record);
+
+            return Exportdata;
+        }
     }
 
 }

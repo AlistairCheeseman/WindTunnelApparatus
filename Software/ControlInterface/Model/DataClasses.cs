@@ -79,5 +79,32 @@ namespace Model
         public double Horizontal;
         public double MeasurementTime;
     }
+    /* Pressure Exporter class */
+    public class PressureExportData
+    {
+        public int id;
+        public DateTime moment;
+        public double Pressure1;
+        public double Temperature1;
+        public double Pressure2;
+        public double Temperature2;
+        public double Pressure3;
+        public double Temperature3;
+        public double Pressure4;
+        public double Temperature4;
+        public double Pressure5;
+        public double Temperature5;
+        public double Pressure6;
+        public double Temperature6;
+        public double Pressure7;
+        public double Temperature7;
+        public double Pressure8;
+        public double Temperature8;
+        public double Pressure9;
+        public double Temperature9;
+        public double Pressure10;
+        public double Temperature10;
+    }
+
 
 }
