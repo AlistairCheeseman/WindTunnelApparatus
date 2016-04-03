@@ -13,7 +13,7 @@ namespace ViewModel
    public class AutomationController : ViewModelBase
     {
         #region Controllers
-        //controllers
+        //controllers 
         public PressureController PressureController { get; } = new PressureController();
         public StepperController StepperController { get; } = new StepperController();
         public HotWireController HotWireController { get; } = new HotWireController();
@@ -78,20 +78,50 @@ namespace ViewModel
                 TotalMeasurementCount = MeasurementList.Count();
             }
         }
-        public void ExportData(string ExportFilePath)
+        public void ExportData(string ExportFolderPath)
         {
-            foreach (AutomationMeasurement AM in MeasurementData.OrderBy(x=>x.id)) // export the measurements in the order they were taken.
+            StringBuilder PressureExport = new StringBuilder();
+            StringBuilder HotwireExport = new StringBuilder();
+
+            PressureExport.Append("LoactionId, VerticalPosn (mm), HortizontalPosn. (mm), Measurementid, Time, Value1(Pa), Temperature1(C), Value2(Pa), Temperature2(C), Value3(Pa), Temperature3(C), Value4(Pa), Temperature4(C), Value5(Pa), Temperature5(C), Value6(Pa), Temperature6(C), Value7(Pa), Temperature7(C), Value8(Pa), Temperature8(C), Value9(Pa), Temperature9(C), Value10(Pa), Temperature10(C)\r\n");
+            HotwireExport.Append("LocationId, VerticalPosn (mm), HorizontalPosn (mm), Measurementid, Time, HotWire1\r\n");
+            foreach (AutomationMeasurement AM in MeasurementData.OrderBy(x => x.id)) // export the measurements in the order they were taken.
             {
                 long LocationId = AM.id; // id of the input location measurement.
                 double verticalmm = AM.PosnVert; // mm of the vertical from origin
                 double horizontalmm = AM.PosnHoriz; // mm of the horizontal from origin.
 
-                foreach (PressureData PM in AM.PressureReadings)
+                // write all the pressure readings for this location.
+                List<PressureExportData> Exportdata = PressureController.getExportData(AM.PressureReadings);
+                foreach (PressureExportData ED in Exportdata)
                 {
-
+                    PressureExport.AppendFormat("{0}\r\n",
+                    LocationId.ToString("##.##") + verticalmm.ToString("##.##") + horizontalmm.ToString("##.##") +
+                    ED.id.ToString() +  ED.moment.ToString("H:mm:ss.fffff") + 
+                    ED.Pressure1 +  ED.Temperature1 +
+                    ED.Pressure2 + ED.Temperature2 +
+                    ED.Pressure3 + ED.Temperature3 +
+                    ED.Pressure4 + ED.Temperature4 +
+                    ED.Pressure5 + ED.Temperature5 +
+                    ED.Pressure6 + ED.Temperature6 +
+                    ED.Pressure7 + ED.Temperature7 +
+                    ED.Pressure8 + ED.Temperature8 +
+                    ED.Pressure9 + ED.Temperature9 +
+                    ED.Pressure10 + ED.Temperature10
+                    );
                 }
-                
+                IOrderedEnumerable<HotWireData> HotWireDataList = AM.HotWireReadings.OrderBy(x => x.id); // export ordered Data.
+                //write all the hotwire data for this location.
+                foreach (HotWireData data in HotWireDataList)
+                {
+                    HotwireExport.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}\r\n",
+                    data.id, data.moment, data.measurement);
+                }
             }
+            System.IO.File.WriteAllText(ExportFolderPath + "HotWireData.csv", HotwireExport.ToString());
+            System.IO.File.WriteAllText(ExportFolderPath + "PressureData.csv", PressureExport.ToString());
+
+
         }
         #endregion
         List<Measurement> MeasurementList = new List<Measurement>(); //list of measurements to be made
