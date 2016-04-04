@@ -36,7 +36,7 @@ namespace UI
             //SFD.Filter = "Comma Separated Values (.csv)|*.csv";
             SFD.ShowDialog();
            long ExportedRecordCount =  ((MenuViewModel)this.DataContext).ExportAll(SFD.FileName);
-            MessageBox.Show(ExportedRecordCount.ToString() + "Records Sucessfully Exported");
+            MessageBox.Show(ExportedRecordCount.ToString() + " Measurements Sucessfully Exported");
         }
 
         private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
