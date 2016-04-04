@@ -83,7 +83,7 @@ namespace Model
     /* Pressure Exporter class */
     public class PressureExportData
     {
-        public int id;
+        public long id;
         public DateTime moment;
         public double Pressure1;
         public double Temperature1;
