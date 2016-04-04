@@ -29,13 +29,14 @@ namespace UI
 
         private void ViewModel_AutomationCompletedEvent()
         { // the automation is completed. prompt to ask for save location.
-            MessageBox.Show("Measurement Completed!");
+            MessageBox.Show("Measurement Completed, Please select folder and file Prefix to save results.");
             Microsoft.Win32.SaveFileDialog SFD = new Microsoft.Win32.SaveFileDialog();
-            SFD.FileName = "AutomationExport";
-            SFD.DefaultExt = ".csv";
-            SFD.Filter = "Comma Separated Values (.csv)|*.csv";
+            SFD.FileName = "AutomationExport-";
+            //SFD.DefaultExt = ".csv";
+            //SFD.Filter = "Comma Separated Values (.csv)|*.csv";
             SFD.ShowDialog();
-            ((MenuViewModel)this.DataContext).ExportAll(SFD.FileName);
+           long ExportedRecordCount =  ((MenuViewModel)this.DataContext).ExportAll(SFD.FileName);
+            MessageBox.Show(ExportedRecordCount.ToString() + "Records Sucessfully Exported");
         }
 
         private void PressureConnectDisconnect_Click(object sender, RoutedEventArgs e)
