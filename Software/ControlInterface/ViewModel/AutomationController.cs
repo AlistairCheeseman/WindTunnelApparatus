@@ -43,7 +43,13 @@ namespace ViewModel
                 this.SetField(ref _TotalMeasurementCount, value, () => TotalMeasurementCount);
             }
         }
-
+        public bool isRunning
+        {
+            get
+            {
+                return BGWorker.IsBusy;
+            }
+        }
         #endregion
         #region public interfaces
         public void BeginWork()
@@ -79,13 +85,14 @@ namespace ViewModel
                 TotalMeasurementCount = MeasurementList.Count();
             }
         }
-        public void ExportData(string ExportFolderPath)
+        public long ExportData(string ExportFolderPath)
         {
             StringBuilder PressureExport = new StringBuilder();
             StringBuilder HotwireExport = new StringBuilder();
 
             PressureExport.Append("LoactionId, VerticalPosn (mm), HortizontalPosn. (mm), Measurementid, Time, Value1(Pa), Temperature1(C), Value2(Pa), Temperature2(C), Value3(Pa), Temperature3(C), Value4(Pa), Temperature4(C), Value5(Pa), Temperature5(C), Value6(Pa), Temperature6(C), Value7(Pa), Temperature7(C), Value8(Pa), Temperature8(C), Value9(Pa), Temperature9(C), Value10(Pa), Temperature10(C)\r\n");
             HotwireExport.Append("LocationId, VerticalPosn (mm), HorizontalPosn (mm), Measurementid, Time, HotWire1\r\n");
+            long PressureCount = 0;
             foreach (AutomationMeasurement AM in MeasurementData.OrderBy(x => x.id)) // export the measurements in the order they were taken.
             {
                 long LocationId = AM.id; // id of the input location measurement.
@@ -93,22 +100,22 @@ namespace ViewModel
                 double horizontalmm = AM.PosnHoriz; // mm of the horizontal from origin.
 
                 // write all the pressure readings for this location.
-                List<PressureExportData> Exportdata = PressureController.getExportData(AM.PressureReadings);
+                List<PressureExportData> Exportdata = PressureController.getExportData(AM.PressureReadings, ref PressureCount);
                 foreach (PressureExportData ED in Exportdata)
                 {
                     PressureExport.AppendFormat("{0}\r\n",
-                    LocationId.ToString("##.##") + verticalmm.ToString("##.##") + horizontalmm.ToString("##.##") +
-                    ED.id.ToString() +  ED.moment.ToString("H:mm:ss.fffff") + 
-                    ED.Pressure1 +  ED.Temperature1 +
-                    ED.Pressure2 + ED.Temperature2 +
-                    ED.Pressure3 + ED.Temperature3 +
-                    ED.Pressure4 + ED.Temperature4 +
-                    ED.Pressure5 + ED.Temperature5 +
-                    ED.Pressure6 + ED.Temperature6 +
-                    ED.Pressure7 + ED.Temperature7 +
-                    ED.Pressure8 + ED.Temperature8 +
-                    ED.Pressure9 + ED.Temperature9 +
-                    ED.Pressure10 + ED.Temperature10
+                    LocationId.ToString("##.##") + "," + verticalmm.ToString("##.##") + "," + horizontalmm.ToString("##.##") + "," +
+                    ED.id.ToString() + "," +  ED.moment.ToString("H:mm:ss.fffff") + "," + 
+                    ED.Pressure1 + "," +  ED.Temperature1 + "," +
+                    ED.Pressure2 + "," + ED.Temperature2 + "," +
+                    ED.Pressure3 + "," + ED.Temperature3 + "," +
+                    ED.Pressure4 + "," + ED.Temperature4 + "," +
+                    ED.Pressure5 + "," + ED.Temperature5 + "," +
+                    ED.Pressure6 + "," + ED.Temperature6 + "," +
+                    ED.Pressure7 + "," + ED.Temperature7 + "," +
+                    ED.Pressure8 + "," + ED.Temperature8 + "," +
+                    ED.Pressure9 + "," + ED.Temperature9 + "," +
+                    ED.Pressure10 + "," + ED.Temperature10
                     );
                 }
                 IOrderedEnumerable<HotWireData> HotWireDataList = AM.HotWireReadings.OrderBy(x => x.id); // export ordered Data.
@@ -119,9 +126,17 @@ namespace ViewModel
                     data.id, data.moment, data.measurement);
                 }
             }
-            System.IO.File.WriteAllText(ExportFolderPath + "HotWireData.csv", HotwireExport.ToString());
-            System.IO.File.WriteAllText(ExportFolderPath + "PressureData.csv", PressureExport.ToString());
-
+            long HotWireLineCount = HotwireExport.ToString().Split('\n').Count() - 1;
+            if (HotWireLineCount > 1)
+            {
+                System.IO.File.WriteAllText(ExportFolderPath + "HotWireData.csv", HotwireExport.ToString());
+            }
+            long PressureLineCount = PressureExport.ToString().Split('\n').Count() - 1;
+            if (PressureLineCount > 1)
+            {
+                System.IO.File.WriteAllText(ExportFolderPath + "PressureData.csv", PressureExport.ToString());
+            }
+            return HotWireLineCount + PressureLineCount; // return the number of records exported.
 
         }
         #endregion
