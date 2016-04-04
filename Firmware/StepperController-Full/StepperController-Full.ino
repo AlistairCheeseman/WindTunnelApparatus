@@ -35,11 +35,19 @@ void longDelay(uint16_t usDelay); // a delay routine that ACTUALLY WORKS......hu
 
 // step program initialises serial connection and Zeroes (no hold) axes.
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(76800);
   Serial.println("STEPPER V1. ENTER CONFIG");
   while (Serial.available() == 0) {} // wait for serial data
   minDelayTime = Serial.parseFloat() * 1000;
   maxDelayTime = Serial.parseFloat() * 1000;
+  if (Serial.parseInt() ==1)
+    dirX = DIR_LEFT;
+  else
+    dirX = DIR_RIGHT;
+  if (Serial.parseInt() ==1)
+    dirY = DIR_LEFT;
+  else
+    dirY = DIR_RIGHT; // down
   Serial.println(minDelayTime, DEC);
   Serial.println(maxDelayTime, DEC);
   //sanity check that configuration is ok.
@@ -81,8 +89,6 @@ void setup() {
 void zero()
 {
   // for each axis step all the way until a limit is met.
-  dirX = DIR_RIGHT;
-  dirY = DIR_LEFT;
   //while limit switch is not triggered, keep stepping.
   while (digitalRead(LimX) == 1)
   {
