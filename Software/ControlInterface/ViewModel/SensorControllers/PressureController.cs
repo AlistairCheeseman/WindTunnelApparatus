@@ -311,14 +311,14 @@ namespace ViewModel.SensorControllers
                 else
                 {
                     isConnected = false;
-                    Console.WriteLine("Could not open serial port.");
+                    Console.WriteLine("Could not open serial port:");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 isConnected = false;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("COULD NOT OPEN SERIAL PORT");
+                Console.WriteLine("COULD NOT OPEN SERIAL PORT: " + ex.ToString());
                 Console.ForegroundColor = ConsoleColor.White;
             }
         }
@@ -341,7 +341,8 @@ namespace ViewModel.SensorControllers
         {
            StringBuilder SB = new StringBuilder();
             SB.Append("id, Time, Value1(Pa), Temperature1(C), Value2(Pa), Temperature2(C), Value3(Pa), Temperature3(C), Value4(Pa), Temperature4(C), Value5(Pa), Temperature5(C), Value6(Pa), Temperature6(C), Value7(Pa), Temperature7(C), Value8(Pa), Temperature8(C), Value9(Pa), Temperature9(C), Value10(Pa), Temperature10(C)\r\n");
-            List<PressureExportData> Exportdata =  getExportData(OutputData); 
+            long PressureCount = 0;
+            List<PressureExportData> Exportdata =  getExportData(OutputData, ref PressureCount); 
             foreach (PressureExportData ED in Exportdata)
             {
                 SB.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20}, {21}\r\n",
@@ -396,11 +397,10 @@ namespace ViewModel.SensorControllers
 
 
 
-        public static List<PressureExportData> getExportData(List<PressureData> _DataIn)
+        public static List<PressureExportData> getExportData(List<PressureData> _DataIn, ref long startId)
         {
             IOrderedEnumerable<PressureData> DataList = _DataIn.OrderBy(x => x.id); // export ordered Data.
             List<PressureExportData> Exportdata = new List<PressureExportData>();
-            int t = 0;
             PressureExportData record = null;
             foreach (PressureData data in DataList)
             {
@@ -410,8 +410,8 @@ namespace ViewModel.SensorControllers
                         if (record != null)
                             Exportdata.Add(record);
                         record = new PressureExportData();
-                        record.id = t;
-                        t++;
+                        record.id = startId;
+                        startId++;
                         record.moment = data.moment;
                         record.Pressure1 = data.Pressure;
                         record.Temperature1 = data.Temperature;
