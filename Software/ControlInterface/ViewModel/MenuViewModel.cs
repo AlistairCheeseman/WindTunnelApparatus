@@ -124,7 +124,7 @@ namespace ViewModel
         }
         public void StepDown()
         {
-            if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
+             if (AutomationController.StepperController.isBusy == false && AutomationController.StepperController.isConnected == true)
                 AutomationController.StepperController.sendCommand(MotorAxis.y, MotorStep.none, MotorSpeed.fast, MotorDirection.right, 6, 0, 0);
         }
         #endregion
@@ -137,9 +137,9 @@ namespace ViewModel
         {
             AutomationController.HotWireController.Export(FilePath);
         }
-        public void ExportAll(string FilePath)
+        public long ExportAll(string FilePath)
         {
-            AutomationController.ExportData(FilePath);
+           return AutomationController.ExportData(FilePath);
         }
         #endregion
         #region UI Timing
@@ -159,7 +159,10 @@ namespace ViewModel
         }
         public void ExecuteMeasurementCycle()
         {
-            AutomationController.BeginWork();
+            if (AutomationController.isRunning == false)
+                AutomationController.BeginWork();
+            else
+                AutomationController.CancelWork();
         }
 
         #region events
