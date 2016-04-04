@@ -20,7 +20,16 @@ namespace ViewModel.SensorControllers
         const int StepsPerRevolution = 200;
         const double pitchum = 1000;
         const long stepResolutionum = (long) pitchum / StepsPerRevolution;
+        const bool hasPosnFeedBack = false; // if the stepper gives posn feedback.
 
+        const long ZeroPosnX = 79000;
+        const long ZeroPosnY = 79000;
+
+        const string minDelay = "2.5";
+        const string maxDelay = "5";
+
+        string ZeroXDir = Convert.ToInt32(MotorDirection.right).ToString();
+        string ZeroYDir = Convert.ToInt32(MotorDirection.left).ToString();
 
         SerialPort SP;
         BackgroundWorker BgWorker = new BackgroundWorker();
@@ -32,7 +41,7 @@ namespace ViewModel.SensorControllers
         {
             //create the serial port
             SP = new SerialPort();
-            SP.BaudRate = 9600;
+            SP.BaudRate = 76800;
             isConnected = false; // set the connection to not connected
             SP.DtrEnable = true; // make the device reset on connect.
             BgWorker.DoWork += BgWorker_DoWork;
@@ -222,9 +231,9 @@ namespace ViewModel.SensorControllers
                 double difference = Math.Abs(yPositionum - Verticalum) / 1000.0; // find the mm difference.
                 // find the direction
                 if (yPositionum > Verticalum)
-                    dir = MotorDirection.left;
-                else
                     dir = MotorDirection.right;
+                else
+                    dir = MotorDirection.left;
 
                 ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
                 byte steps = (byte)((difference - (double)Revs) / (stepResolutionum / 1000.0)); // get fraction of mm and divide by step resolution
@@ -248,18 +257,19 @@ namespace ViewModel.SensorControllers
             else if (command == "YL\r\n" || command == "YR\r\n")
             {
                 if (command.Contains("L"))
-                    yPositionum = yPositionum - stepResolutionum;
-                else
                     yPositionum = yPositionum + stepResolutionum;
+                else
+                    yPositionum = yPositionum - stepResolutionum;
             }
             else if (command == "STEPPER V1. ENTER CONFIG\r\n")
             {
-                SP.Write("1.5 65\r\n"); // give the max speed delay and the min speed delay
+                //slow speed fast speed dirx diry
+                SP.Write(minDelay + " " + maxDelay + " " + ZeroXDir+" " + ZeroYDir + "\r\n"); // give the max speed delay and the min speed delay
             }
             else if (command == "ZEROED\r\n")
             {
-                xPositionum = 0;
-                yPositionum = 0;
+                xPositionum = ZeroPosnX;
+                yPositionum = ZeroPosnY;
             }
             else if (command == "OK WAIT\r\n")
             {
