@@ -22,10 +22,14 @@ namespace UI
         public StimulusGenerator()
         {
             InitializeComponent();
-            horizontalminTxt.Text = "-150";
-            horizontalmaxTxt.Text = "150";
-            verticalminTxt.Text = "-150";
-            verticalmaxTxt.Text = "150";
+            horizontalminTxt.Text = "-79";
+            horizontalmaxTxt.Text = "79";
+            verticalminTxt.Text = "-79";
+            verticalmaxTxt.Text = "79";
+            PeriodTxt.Text = "100";
+            SettleDurationTxt.Text = "5";
+            StepTxt.Text = "10";
+            RasterVerticalOption.IsChecked = true;
         }
 
         private void GenerateBtn_Click(object sender, RoutedEventArgs e)
