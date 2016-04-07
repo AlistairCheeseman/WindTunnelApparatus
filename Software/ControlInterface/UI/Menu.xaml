@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI"
         mc:Ignorable="d"
-        Title="Menu" Height="571.949" Width="730.282">
+        Title="Menu" Height="616.949" Width="699.282">
     <Grid>
         <Menu x:Name="menu" Height="25" Margin="0,0,0,0" VerticalAlignment="Top" >
             <MenuItem Header="Utils" >
@@ -143,7 +143,7 @@
         </GroupBox>
 
 
-        <GroupBox Header="Stimulus" Margin="0,269,10,67" Background="GhostWhite" HorizontalAlignment="Right" Width="252" >
+        <GroupBox Header="Stimulus" Margin="0,269,10,116" Background="GhostWhite" HorizontalAlignment="Right" Width="252" >
             <Grid>
                 <Button Content="Load Stimulus file" Margin="10,10,51,133" x:Name="LoadStimulusBtn" Click="LoadStimulusBtn_Click" />
                 <StackPanel Margin="10,63,10,69">
@@ -159,5 +159,20 @@
                 <Button Content="GO!!" Margin="10,119,10,10" x:Name="GoBtn" Click="GoBtn_Click"/>
             </Grid>
         </GroupBox>
+        <GroupBox Header="Enviromental Conditions" Margin="0,0,12,10" HorizontalAlignment="Right" Width="250" Height="100" VerticalAlignment="Bottom">
+            <Grid>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Atmospheric Pressure:" />
+                        <TextBox Text="{Binding AutomationController.AtmosPres}" MinWidth="50" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Atmospheric Temperature:" />
+                        <TextBox Text="{Binding AutomationController.AtmosTemp}" MinWidth="50" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
     </Grid>
 </Window>
