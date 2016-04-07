@@ -93,13 +93,13 @@ void zero()
   while (digitalRead(LimX) == 1)
   {
     stepX(); // step
-    longDelay(minDelayTime); // wait min delay time
+    longDelay(minDelayTime+ 200); // wait min delay time + some room
   }
   stopMotorX();
   while (digitalRead(LimY) == 1)
   {
     stepY();
-    longDelay(minDelayTime);
+    longDelay(minDelayTime + 200);
   }
   stopMotorY();
 }
@@ -281,12 +281,14 @@ void loop() {
 
 uint16_t updateDelay(uint64_t totalStep, uint64_t currentStep, uint16_t currentDelay)
 {
-  if (currentStep > (totalStep - 600))
+  if (currentStep > (totalStep - 26))
   {
     if (currentDelay < maxDelayTime)
       return currentDelay + 100;
+    else
+      return maxDelayTime;
   }
-  else if (currentStep < 600)
+  else if (currentStep < 26)
   { // accelerate
     if (currentDelay > minDelayTime)
       return currentDelay - 100;
