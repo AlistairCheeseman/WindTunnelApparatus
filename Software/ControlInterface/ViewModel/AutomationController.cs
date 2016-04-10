@@ -256,8 +256,8 @@ namespace ViewModel
                     Pressure6Avg = Exportdata.Average(x => x.Pressure6);
                     Pressure7Avg = Exportdata.Average(x => x.Pressure7);
                     Pressure8Avg = Exportdata.Average(x => x.Pressure8);
-                    Pressure9Avg = Exportdata.Average(x => x.Pressure1);
-                    Pressure10Avg = Exportdata.Average(x => x.Pressure1);
+                    Pressure9Avg = Exportdata.Average(x => x.Pressure9);
+                    Pressure10Avg = Exportdata.Average(x => x.Pressure10);
                     if (Pressure4Avg == 0)
                     {
                         Console.WriteLine("RESET FPGA - BAD READING!");
