@@ -159,14 +159,20 @@ namespace ViewModel
         #endregion
 
         #region Internal automation worker Methods   
-
+        public bool abort
+        {
+            get; set;
+        } = false;
     // private void BGWorker_DoWork(object sender, DoWorkEventArgs e)
     public async Task Automate()
         {
             long PressureMeasurementCount = 0;
             foreach (Measurement mes in MeasurementList.OrderBy(x => x.id))
             {
-                continue;
+                if (abort == true)
+                {
+                    continue; // skip the reading.
+                }
                 // move the stepper motor to the position
                 // wait for the flow to settle
                 // measure and wait
