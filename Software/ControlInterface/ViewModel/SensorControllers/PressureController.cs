@@ -224,6 +224,19 @@ namespace ViewModel.SensorControllers
             {
                 if (LastReading == null | ReadingCount == 0) // if there hasn't been a reading.
                     LastReading = FirstReading.Value;  // set the time stamp value for this data set.
+
+                //reset sensor readings.
+                CurrentSensor1Reading = 0;
+                CurrentSensor2Reading = 0;
+                CurrentSensor3Reading = 0;
+                CurrentSensor4Reading = 0;
+                CurrentSensor5Reading = 0;
+                CurrentSensor6Reading = 0;
+                CurrentSensor7Reading = 0;
+                CurrentSensor8Reading = 0;
+                CurrentSensor9Reading = 0;
+                CurrentSensor10Reading = 0;
+
                 // Console.WriteLine(BitConverter.ToString(item));
                 PacketQueueCount = PacketQueue.Count();
                 int SensorCount = 0;
@@ -297,6 +310,8 @@ namespace ViewModel.SensorControllers
         {
             try
             {
+                ArrayQueue = new BlockingCollection<byte[]>(); // make sure queue is reset.
+                PacketQueue = new BlockingCollection<byte[]>(); // make sure queue is reset.
                 SP.PortName = ComPort;
                 SP.Open();
                 FS = System.IO.File.OpenWrite("PressureLog" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".dat");
