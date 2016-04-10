@@ -56,15 +56,50 @@ namespace Model
     /* container to hold the measurements for a set position */
     public class AutomationMeasurement
     {
-        public AutomationMeasurement(long _id, double _posnHoriz, double _posnVert, List<PressureData> _pressure, List<HotWireData> _hotWire)
+        public AutomationMeasurement(long _id, double _posnHoriz, double _posnVert,
+            double _Pressure1Avg,
+             double _Pressure2Avg,
+              double _Pressure3Avg,
+               double _Pressure4Avg,
+                double _Pressure5Avg,
+                 double _Pressure6Avg,
+                  double _Pressure7Avg,
+                   double _Pressure8Avg,
+                    double _Pressure9Avg,
+                     double _Pressure10Avg,
+            List<HotWireData> _hotWire)
         {
             this.id = _id;
             this.PosnHoriz = _posnHoriz;
             this.PosnVert = _posnVert;
-            this.PressureReadings = _pressure;
+            this.Pressure1Avg = _Pressure1Avg;
+            this.Pressure2Avg = _Pressure2Avg;
+            this.Pressure3Avg = _Pressure3Avg;
+            this.Pressure4Avg = _Pressure4Avg;
+            this.Pressure5Avg = _Pressure5Avg;
+            this.Pressure6Avg = _Pressure6Avg;
+            this.Pressure7Avg = _Pressure7Avg;
+            this.Pressure8Avg = _Pressure8Avg;
+            this.Pressure9Avg = _Pressure9Avg;
+            this.Pressure10Avg = _Pressure10Avg;
             this.HotWireReadings = _hotWire;
         }
-        public List<PressureData> PressureReadings { get; set; }
+       public double Pressure1Avg
+        {
+            get; set;
+        }
+      public double Pressure2Avg
+        {
+            get; set;
+        }
+        public double Pressure3Avg { get; set; }
+        public double Pressure4Avg { get; set; }
+        public double Pressure5Avg { get; set; }
+        public double Pressure6Avg { get; set; }
+        public double Pressure7Avg { get; set; }
+        public double Pressure8Avg { get; set; }
+        public double Pressure9Avg { get; set; }
+        public double Pressure10Avg { get; set; }
         public List<HotWireData> HotWireReadings { get; set; }
         public double PosnHoriz { get; set; }
         public double PosnVert { get; set; }

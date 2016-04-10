@@ -12,6 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ViewModel;
+using System.ComponentModel;
+using ViewModel.SensorControllers;
+using ViewModel.Helpers;
+using Model;
+
 
 namespace UI
 {
@@ -132,9 +137,10 @@ namespace UI
             }
         }
 
-        private void GoBtn_Click(object sender, RoutedEventArgs e)
+        private async void GoBtn_Click(object sender, RoutedEventArgs e)
         {
-            ((MenuViewModel)this.DataContext).ExecuteMeasurementCycle();
+            //  ((MenuViewModel)this.DataContext).ExecuteMeasurementCycle();
+          await  ((MenuViewModel)this.DataContext).AutomationController.Automate();
         }
     }
 }

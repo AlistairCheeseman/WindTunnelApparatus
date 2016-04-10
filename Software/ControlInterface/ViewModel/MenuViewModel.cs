@@ -20,8 +20,8 @@ namespace ViewModel
         public MenuViewModel()
         {
             //initialise raw values
-            PressureCom = "COM9";
-            StepperCom = "COM6";
+            PressureCom = "COM8";
+            StepperCom = "COM14";
             HotWireCom = "COM14";
 
             timer.Tick += UIUpdateTimer; // Timer to update UI information
@@ -157,12 +157,9 @@ namespace ViewModel
         {
             AutomationController.loadStimulusFile(FilePath, this);
         }
-        public void ExecuteMeasurementCycle()
+        public async Task ExecuteMeasurementCycle()
         {
-            if (AutomationController.isRunning == false)
-                AutomationController.BeginWork();
-            else
-                AutomationController.CancelWork();
+            await AutomationController.Automate();
         }
 
         #region events
