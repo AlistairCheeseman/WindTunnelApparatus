@@ -40,7 +40,8 @@ namespace ViewModel.SensorControllers
         }
 
         #region Data container + helpers
-        public List<PressureData> OutputData = new List<PressureData>();
+        public List<PressureData> OutputData { get; set; } = new List<PressureData>();
+        public bool RecordData = false;
         public double CurrentSensor1Reading
         { get; private set; } = 0;
         public double CurrentSensor2Reading
@@ -61,14 +62,7 @@ namespace ViewModel.SensorControllers
         { get; private set; } = 0;
         public double CurrentSensor10Reading
         { get; private set; } = 0;
-        // data class for the graph to look at.
-        public List<PressureData> GraphData
-        {
-            get
-            {
-                return OutputData.ToList();
-            }
-        }
+
         #endregion
         #region Connection Information
         private int _SerialQueueCount = 0;
@@ -188,7 +182,7 @@ namespace ViewModel.SensorControllers
         private void BWSerialiser(object sender, DoWorkEventArgs e)
         {
             byte lastrecord = 0x00;
-            byte[] currentPacket = new byte[500]; // a nice big buffer in case the data has become mangled.
+            byte[] currentPacket = new byte[8000]; // a nice big buffer in case the data has become mangled.
             int dataIndex = 0; // pointer to hold the index to the array
             foreach (var item in ArrayQueue.GetConsumingEnumerable()) // this gets each item, blocking if there is not any data, quits when CompleteAdding() is finished.
             {
@@ -265,8 +259,11 @@ namespace ViewModel.SensorControllers
                         //temp range = 2048 - 0 == -5 to +65
                         double Temperature = (rawTemperature * (70.0 / 2048.0)) - 5.0;
 
-                        OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
-                        ReadingCount++;
+                        if (RecordData == true)
+                        {
+                            OutputData.Add(new PressureData(ReadingCount, Pa, Temperature, ErrorCode, SensorId, LastReading.Value));
+                            ReadingCount++;
+                        }
 
                         switch (SensorId)
                         {
@@ -399,12 +396,17 @@ namespace ViewModel.SensorControllers
 
         public static List<PressureExportData> getExportData(List<PressureData> _DataIn, ref long startId)
         {
-            IOrderedEnumerable<PressureData> DataList = _DataIn.OrderBy(x => x.id); // export ordered Data.
+            List<PressureData> DataList = _DataIn;
+         //   DataList.Sort(delegate (PressureData c1, PressureData c2) { return c1.id.CompareTo(c2.id); }); // export ordered Data.
             List<PressureExportData> Exportdata = new List<PressureExportData>();
-            PressureExportData record = null;
-            foreach (PressureData data in DataList)
+            PressureExportData record = new PressureExportData();
+
+            int readingCount = DataList.Count();
+
+
+            for (int reading = 0; reading < readingCount; reading++)
             {
-                switch (data.sensorId)
+                switch (DataList[reading].sensorId)
                 {
                     case 1:
                         if (record != null)
@@ -412,45 +414,45 @@ namespace ViewModel.SensorControllers
                         record = new PressureExportData();
                         record.id = startId;
                         startId++;
-                        record.moment = data.moment;
-                        record.Pressure1 = data.Pressure;
-                        record.Temperature1 = data.Temperature;
+                        record.moment = DataList[reading].moment;
+                        record.Pressure1 = DataList[reading].Pressure;
+                        record.Temperature1 = DataList[reading].Temperature;
                         break;
                     case 2:
-                        record.Pressure2 = data.Pressure;
-                        record.Temperature2 = data.Temperature;
+                        record.Pressure2 = DataList[reading].Pressure;
+                        record.Temperature2 = DataList[reading].Temperature;
                         break;
                     case 3:
-                        record.Pressure3 = data.Pressure;
-                        record.Temperature3 = data.Temperature;
+                        record.Pressure3 = DataList[reading].Pressure;
+                        record.Temperature3 = DataList[reading].Temperature;
                         break;
                     case 4:
-                        record.Pressure4 = data.Pressure;
-                        record.Temperature4 = data.Temperature;
+                        record.Pressure4 = DataList[reading].Pressure;
+                        record.Temperature4 = DataList[reading].Temperature;
                         break;
                     case 5:
-                        record.Pressure5 = data.Pressure;
-                        record.Temperature5 = data.Temperature;
+                        record.Pressure5 = DataList[reading].Pressure;
+                        record.Temperature5 = DataList[reading].Temperature;
                         break;
                     case 6:
-                        record.Pressure6 = data.Pressure;
-                        record.Temperature6 = data.Temperature;
+                        record.Pressure6 = DataList[reading].Pressure;
+                        record.Temperature6 = DataList[reading].Temperature;
                         break;
                     case 7:
-                        record.Pressure7 = data.Pressure;
-                        record.Temperature7 = data.Temperature;
+                        record.Pressure7 = DataList[reading].Pressure;
+                        record.Temperature7 = DataList[reading].Temperature;
                         break;
                     case 8:
-                        record.Pressure8 = data.Pressure;
-                        record.Temperature8 = data.Temperature;
+                        record.Pressure8 = DataList[reading].Pressure;
+                        record.Temperature8 = DataList[reading].Temperature;
                         break;
                     case 9:
-                        record.Pressure9 = data.Pressure;
-                        record.Temperature9 = data.Temperature;
+                        record.Pressure9 = DataList[reading].Pressure;
+                        record.Temperature9 = DataList[reading].Temperature;
                         break;
                     case 10:
-                        record.Pressure10 = data.Pressure;
-                        record.Temperature10 = data.Temperature;
+                        record.Pressure10 = DataList[reading].Pressure;
+                        record.Temperature10 = DataList[reading].Temperature;
                         break;
                 }
             }
