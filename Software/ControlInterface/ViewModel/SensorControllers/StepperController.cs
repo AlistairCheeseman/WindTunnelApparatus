@@ -22,14 +22,14 @@ namespace ViewModel.SensorControllers
         const long stepResolutionum = (long) pitchum / StepsPerRevolution;
         const bool hasPosnFeedBack = false; // if the stepper gives posn feedback.
 
-        const long ZeroPosnX = 79000;
-        const long ZeroPosnY = 79000;
+        const long ZeroPosnX = 00000;
+        const long ZeroPosnY = 00000;
 
-        const string minDelay = "2.5";
+        const string minDelay = "2";
         const string maxDelay = "5";
 
-        string ZeroXDir = Convert.ToInt32(MotorDirection.right).ToString();
-        string ZeroYDir = Convert.ToInt32(MotorDirection.left).ToString();
+        string ZeroXDir = Convert.ToInt32(MotorDirection.left).ToString();
+        string ZeroYDir = Convert.ToInt32(MotorDirection.right).ToString();
 
         SerialPort SP;
         BackgroundWorker BgWorker = new BackgroundWorker();
@@ -56,7 +56,7 @@ namespace ViewModel.SensorControllers
                 // this routine has to sort the data into new lines.
                 foreach (byte t in inData)
                 {
-                    Console.Write((char)t);
+                   // Console.Write((char)t);
                     thisCommand += ((char)t).ToString();
                     if (((char)t).ToString() == "\n")
                     {
@@ -246,7 +246,7 @@ namespace ViewModel.SensorControllers
 
         public void processCommand(string command)
         {
-            Console.WriteLine("Command Processing: " + command);
+        //    Console.WriteLine("Command Processing: " + command);
             if (command == "XL\r\n" || command == "XR\r\n")
             {
                 if (command.Contains("L"))
