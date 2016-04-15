@@ -156,7 +156,8 @@
                         <TextBlock Text="{Binding AutomationController.TotalMeasurementCount}" />
                     </StackPanel>
                 </StackPanel>
-                <Button Content="GO!!" Margin="10,119,10,10" x:Name="GoBtn" Click="GoBtn_Click"/>
+                <Button Content="GO!!" Margin="10,119,112,10" x:Name="GoBtn" Click="GoBtn_Click"/>
+                <Button Content="Pause" Margin="133,119,10,10" x:Name="PauseBtn" Click="PauseBtn_Click"/> 
             </Grid>
         </GroupBox>
         <GroupBox Header="Enviromental Conditions" Margin="0,0,12,10" HorizontalAlignment="Right" Width="250" Height="100" VerticalAlignment="Bottom">
