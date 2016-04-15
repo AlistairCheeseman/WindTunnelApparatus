@@ -69,7 +69,12 @@ namespace ViewModel
             }
 
         }
-        
+
+        public bool isPaused
+        {
+            get; set;
+        } = false;
+    
         #endregion
         #region public interfaces
       
@@ -166,6 +171,7 @@ namespace ViewModel
     // private void BGWorker_DoWork(object sender, DoWorkEventArgs e)
     public async Task Automate()
         {
+            MeasurementData = new List<AutomationMeasurement>();
             long PressureMeasurementCount = 0;
             foreach (Measurement mes in MeasurementList.OrderBy(x => x.id))
             {
@@ -173,6 +179,7 @@ namespace ViewModel
                 {
                     continue; // skip the reading.
                 }
+
                 // move the stepper motor to the position
                 // wait for the flow to settle
                 // measure and wait
@@ -206,32 +213,46 @@ namespace ViewModel
                             await Task.Delay(1000);
                         } // be sure controller is free before we do anything.
 
+                        if (StepperController.xPositionmm != mes.Horizontal)
+                        {
+                            // move to X posn.
+                            if (StepperController.gotoHorizontal((long)(mes.Horizontal * 1000.0)) == false)
+                            {
+                                // error
+                                Console.WriteLine("Horizontal Error");
+                            }
+                            while (StepperController.isBusy == true)
+                            {
+                                //System.Threading.Thread.Sleep(1000);
+                                await Task.Delay(1000);
+                            }
+                        }
 
-                        // move to X posn.
-                        if (StepperController.gotoHorizontal((long)(mes.Horizontal * 1000.0)) == false)
-                        {
-                            // error
-                            Console.WriteLine("Horizontal Error");
-                        }
-                        while (StepperController.isBusy == true)
-                        {
-                            //System.Threading.Thread.Sleep(1000);
-                            await Task.Delay(1000);
-                        }
 
-                        //move to Y posn
-                        if (StepperController.gotoVertical((long)(mes.Vertical * 1000.0)) == false)
+                        if (StepperController.yPositionmm != mes.Vertical)
                         {
-                            // error
-                            Console.WriteLine("Vertical Error");
-                        }
-                        while (StepperController.isBusy == true)
-                        {
-                            await Task.Delay(1000);
-                            //System.Threading.Thread.Sleep(1000);
+                            //move to Y posn
+                            if (StepperController.gotoVertical((long)(mes.Vertical * 1000.0)) == false)
+                            {
+                                // error
+                                Console.WriteLine("Vertical Error");
+                            }
+                            while (StepperController.isBusy == true)
+                            {
+                                await Task.Delay(1000);
+                                //System.Threading.Thread.Sleep(1000);
+                            }
                         }
                     }
-
+                    if (this.isPaused == true)
+                    {
+                        Console.WriteLine("Paused");
+                        while (isPaused == true)
+                        {
+                            await Task.Delay(new TimeSpan(0, 0, 0, 3)); // wait 3 seconds
+                        }
+                        Console.WriteLine("Resuming");
+                    }
                     int seconds = (int)mes.SettleTime;
                     int milliseconds = (int)((mes.SettleTime % 1) * 1000.0);
 
@@ -243,41 +264,46 @@ namespace ViewModel
                     //  System.Threading.Thread.Sleep(new TimeSpan((long)(mes.MeasurementTime * 10.0))); // wait for the appropriate sample time.
                     await Task.Delay(new TimeSpan(0, 0, 0, seconds, milliseconds + 5)); // add a little to allow for the time for the property to update
                     PressureController.RecordData = false;
-
-                    List<PressureData> Pressure = PressureController.OutputData.ToList();
-
-                    List<PressureExportData> Exportdata = PressureController.getExportData(Pressure, ref PressureMeasurementCount);
-                    Console.WriteLine(Exportdata.Count() + " Readings Taken");
-                    Pressure1Avg = Exportdata.Average(x => x.Pressure1);
-                    Pressure2Avg = Exportdata.Average(x => x.Pressure2);
-                    Pressure3Avg = Exportdata.Average(x => x.Pressure3);
-                    Pressure4Avg = Exportdata.Average(x => x.Pressure4);
-                    Pressure5Avg = Exportdata.Average(x => x.Pressure5);
-                    Pressure6Avg = Exportdata.Average(x => x.Pressure6);
-                    Pressure7Avg = Exportdata.Average(x => x.Pressure7);
-                    Pressure8Avg = Exportdata.Average(x => x.Pressure8);
-                    Pressure9Avg = Exportdata.Average(x => x.Pressure9);
-                    Pressure10Avg = Exportdata.Average(x => x.Pressure10);
-                    if (Pressure4Avg == 0)
+                    try
                     {
-                        Console.WriteLine("RESET FPGA - BAD READING!");
-                        Pressure1Avg = 0;
-                        Pressure2Avg = 0;
-                        Pressure3Avg = 0;
-                        Pressure4Avg = 0;
-                        Pressure5Avg = 0;
-                        Pressure6Avg = 0;
-                        Pressure7Avg = 0;
-                        Pressure8Avg = 0;
-                        Pressure9Avg = 0;
-                        Pressure10Avg = 0;
-                    }
-                    else
-                    {
-                        goodReading = true;
-                        break;
-                    }
+                        List<PressureData> Pressure = PressureController.OutputData.ToList();
 
+                        List<PressureExportData> Exportdata = PressureController.getExportData(Pressure, ref PressureMeasurementCount);
+                        Console.WriteLine(Exportdata.Count() + " Readings Taken");
+                        Pressure1Avg = Exportdata.Average(x => x.Pressure1);
+                        Pressure2Avg = Exportdata.Average(x => x.Pressure2);
+                        Pressure3Avg = Exportdata.Average(x => x.Pressure3);
+                        Pressure4Avg = Exportdata.Average(x => x.Pressure4);
+                        Pressure5Avg = Exportdata.Average(x => x.Pressure5);
+                        Pressure6Avg = Exportdata.Average(x => x.Pressure6);
+                        Pressure7Avg = Exportdata.Average(x => x.Pressure7);
+                        Pressure8Avg = Exportdata.Average(x => x.Pressure8);
+                        Pressure9Avg = Exportdata.Average(x => x.Pressure9);
+                        Pressure10Avg = Exportdata.Average(x => x.Pressure10);
+                        if (Pressure4Avg == 0)
+                        {
+                            Console.WriteLine("RESET FPGA - BAD READING!");
+                            Pressure1Avg = 0;
+                            Pressure2Avg = 0;
+                            Pressure3Avg = 0;
+                            Pressure4Avg = 0;
+                            Pressure5Avg = 0;
+                            Pressure6Avg = 0;
+                            Pressure7Avg = 0;
+                            Pressure8Avg = 0;
+                            Pressure9Avg = 0;
+                            Pressure10Avg = 0;
+                        }
+                        else
+                        {
+                            goodReading = true;
+                            break;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("ERROR");
+                    }
 
                 } // end while  - got reading.
 
