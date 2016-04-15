@@ -81,12 +81,11 @@ namespace UI
             long id = 0;
             double Horizontal, Vertical;
             // intialise to the top left hand corner.
-            Horizontal = horizontalmin;
-            Vertical = verticalmax + ActualStepVertical;
-         
 
             if (RasterVerticalOption.IsChecked == true)
             {
+                Horizontal = horizontalmin;
+                Vertical = verticalmax + ActualStepVertical;
                 for (int t = 1; t <= StepCount; t++)
                 {
                     for (int u = 1; u <= StepCount; u++)
@@ -99,8 +98,10 @@ namespace UI
                     Vertical = verticalmax + ActualStepVertical;
                 }
             }
-            else if (RasterVerticalOption.IsChecked == true)
+            else if (RasterHorizontalOption.IsChecked == true)
             {
+                Vertical = verticalmax;
+                Horizontal = horizontalmin - ActualStepHorizontal;
                 for (int t = 1; t <= StepCount; t++)
                 {
                     for (int u = 1; u <= StepCount; u++)
