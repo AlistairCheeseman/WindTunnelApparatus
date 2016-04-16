@@ -25,7 +25,7 @@ namespace ViewModel.SensorControllers
         const long ZeroPosnX = 00000;
         const long ZeroPosnY = 00000;
 
-        const string minDelay = "2";
+        const string minDelay = "2.5";
         const string maxDelay = "5";
 
         string ZeroXDir = Convert.ToInt32(MotorDirection.left).ToString();

@@ -142,5 +142,11 @@ namespace UI
             //  ((MenuViewModel)this.DataContext).ExecuteMeasurementCycle();
           await  ((MenuViewModel)this.DataContext).AutomationController.Automate();
         }
+        private void PauseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            bool isCurrentlyPaused = ((MenuViewModel)this.DataContext).AutomationController.isPaused;
+            isCurrentlyPaused = !isCurrentlyPaused;
+            ((MenuViewModel)this.DataContext).AutomationController.isPaused = isCurrentlyPaused;
+        }
     }
 }
