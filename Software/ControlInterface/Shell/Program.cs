@@ -17,9 +17,9 @@ namespace Shell
     {
         public static void run()
         {
-            MenuViewModel VM = new MenuViewModel();
-            UI.Menu MW = new UI.Menu(ref VM);
-            MW.ShowDialog();
+            MenuViewModel VM = new MenuViewModel(); // create the view model container
+            UI.Menu MW = new UI.Menu(ref VM); // create the view.
+            MW.ShowDialog(); // display the program to the user.
 
         }
     }

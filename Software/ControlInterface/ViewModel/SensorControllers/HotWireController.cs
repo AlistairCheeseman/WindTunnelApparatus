@@ -16,14 +16,17 @@ namespace ViewModel.SensorControllers
     public class HotWireController : ViewModelBase
     {
         #region internal variables
-        SerialPort SP;
-        FileStream FS = null;
-        BackgroundWorker SerialWorker = new BackgroundWorker();
+        SerialPort SP;  //serial port to receive data
+        FileStream FS = null; // file stream to write a log to.
+
+        //background workers to process the data.
+        BackgroundWorker SerialWorker = new BackgroundWorker(); 
         BackgroundWorker DataDefragmentor = new BackgroundWorker();
         BackgroundWorker DataProcessor = new BackgroundWorker();
+
         Random RandomGenerator = new Random(); // random number generator - for delays.
         DateTime? FirstReading = null; // When the readings have started.
-        DateTime? LastReading = null;
+        DateTime? LastReading = null; // when the last reading was
         // buffer between SerialWorker and DataProcessor.
         BlockingCollection<byte[]> ArrayQueue = new BlockingCollection<byte[]>(); // a thread-safe queue of serial array data to be processed.
         BlockingCollection<byte[]> PacketQueue = new BlockingCollection<byte[]>(); // a queue of packets. 
@@ -37,7 +40,7 @@ namespace ViewModel.SensorControllers
             SP.ReadBufferSize = 2147483646; //the Max buffer size so we don't slow down the FPGA.
             isConnected = false; // default to not connected.
             SerialWorker.DoWork += BWReadSerial; // assign the serial reader function
-            SerialWorker.WorkerSupportsCancellation = true;
+            SerialWorker.WorkerSupportsCancellation = true; // can the worker be cancelled?
             DataDefragmentor.DoWork += BWSerialiser; // assign the data serialiser.
             DataProcessor.DoWork += BWDataProcessor; // assign the data reader process
         }
@@ -45,9 +48,10 @@ namespace ViewModel.SensorControllers
 
 
         #region Properties + Data
-        public List<HotWireData> OutputData = new List<HotWireData>();
-        public double CurrentSensor1Reading
+        public List<HotWireData> OutputData = new List<HotWireData>(); // container for the results
+        public double CurrentSensor1Reading //what the current reading is
         { get; private set; } = 0;
+        //Connection State Property
         private ConnectionState _ConnectionState = ConnectionState.Disconnected;
         public ConnectionState ConnectionState
         {
@@ -60,6 +64,7 @@ namespace ViewModel.SensorControllers
                 this.SetField(ref _ConnectionState, value, () => ConnectionState);
             }
         }
+        //if the device is connected property
         private bool _isConnected = false;
         public bool isConnected
         {
@@ -79,6 +84,7 @@ namespace ViewModel.SensorControllers
                 this.SetField(ref _isConnected, value, () => isConnected);
             }
         }
+        //count of bytes in the serial queue waiting to be processed property
         private int _SerialQueueCount = 0;
         public int SerialQueueCount
         {
@@ -91,6 +97,7 @@ namespace ViewModel.SensorControllers
                 _SerialQueueCount = value;
             }
         }
+        //the bytes in the 1st queue
         private int _BytesQueueCount = 0;
         public int BytesQueueCount
         {
@@ -103,6 +110,7 @@ namespace ViewModel.SensorControllers
                 _BytesQueueCount = value;
             }
         }
+        //bytes left to be calculated queu count
         private int _PacketQueueCount = 0;
         public int PacketQueueCount
         {
@@ -118,20 +126,20 @@ namespace ViewModel.SensorControllers
         #endregion
         #region Functions called by other classes
         public void Connect(string ComPort)
-        {
+        { // connect to the sensor.
             try
             {
-                SP.PortName = ComPort;
-                SP.Open();
-                FS = File.OpenWrite("HotWireLog" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".dat");
-                if (SP.IsOpen == true)
+                SP.PortName = ComPort; // set the right com port
+                SP.Open(); // open the com port
+                FS = File.OpenWrite("HotWireLog" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".dat"); // open a file to log to
+                if (SP.IsOpen == true) // did it open successfully?
                 {
-                    isConnected = true;
-                    SerialWorker.RunWorkerAsync();
+                    isConnected = true; // set the connected flag
+                    SerialWorker.RunWorkerAsync(); // startup the background workers.
                 }
                 else
                 {
-                    isConnected = false;
+                    isConnected = false; // update the connected property to disconnected.
                     Console.WriteLine("Could not open serial port.");
                 }
             }
@@ -156,18 +164,20 @@ namespace ViewModel.SensorControllers
         }
         public void Export(string FilePath)
         {
-            IOrderedEnumerable<HotWireData> DataList = OutputData.OrderBy(x => x.id); // export ordered Data.
-            StringBuilder SB = new StringBuilder();
-            SB.Append("id, Time, HotWire1\r\n");
-            foreach (HotWireData data in DataList)
+            // export the data.
+            IOrderedEnumerable<HotWireData> DataList = OutputData.OrderBy(x => x.id); // order Data.
+            StringBuilder SB = new StringBuilder(); //container for export
+            SB.Append("id, Time, HotWire1\r\n"); // append the heading
+            foreach (HotWireData data in DataList) // foreach record
             {
                 SB.AppendFormat("{0}, {1:H:mm:ss.fffff}, {2}\r\n",
-                data.id, data.moment, data.measurement);
+                data.id, data.moment, data.measurement); // actually write the data.
             }
-            System.IO.File.WriteAllText(FilePath, SB.ToString());
+            System.IO.File.WriteAllText(FilePath, SB.ToString()); // write the data to the file.
         }
         public void TriggerUIUpdate()
         {
+            // this is called if the UI thread requests an update of any values.
             this.OnPropertyChanged("CurrentSensor1Reading");
             this.OnPropertyChanged("SerialQueueCount");
             this.OnPropertyChanged("BytesQueueCount");
@@ -176,35 +186,38 @@ namespace ViewModel.SensorControllers
         #endregion
 
         #region BackgroundWorkers
+        // background workers actually process the data
+
+            //read in the data from the serial port and load it into a queue.
         private void BWReadSerial(object sender, DoWorkEventArgs e)
         {
             bool finishFlag = false;
-            while (finishFlag == false && e.Cancel == false)
+            while (finishFlag == false && e.Cancel == false) // make sure not cancelled or finished.
             {
-                if (SP != null && SP.IsOpen == false)
+                if (SP != null && SP.IsOpen == false) // check the serial port is still open
                 {
                     finishFlag = true;
                     this.isConnected = false;
                     break; // close the worker down.
                 }
-                SerialQueueCount = SP.BytesToRead;
-                if (FirstReading == null)
-                    FirstReading = (DateTime.Now);
+                SerialQueueCount = SP.BytesToRead; // how many bytes are waiting to be read.
+                if (FirstReading == null) // is this the first reading
+                    FirstReading = (DateTime.Now); // set the arrival date.
 
-                int bytes = SP.BytesToRead;
-                if (bytes == 0x00)
+                int bytes = SP.BytesToRead; // the number of bytes to read.
+                if (bytes == 0x00) // check the are bytes waiting to be read.
                 {
                     System.Threading.Thread.Sleep(100); // sleep and wait for data.
                     continue; // move to next loop.
                 }
                 else if (bytes > System.Int32.MaxValue) // catch a too big buffer.
-                    bytes = System.Int32.MaxValue;
-                byte[] data = new byte[bytes];
-                SP.Read(data, 0, bytes);
-                bool hasAdded = false;
+                    bytes = System.Int32.MaxValue; // lower it down to a more usable number
+                byte[] data = new byte[bytes]; // create an array to hold the data
+                SP.Read(data, 0, bytes); // actually read the data.
+                bool hasAdded = false; // flag to check if the data was sucessfully added
                 while (hasAdded == false)
                 {
-                    hasAdded = ArrayQueue.TryAdd(data);
+                    hasAdded = ArrayQueue.TryAdd(data); // try and add the data
                     if (hasAdded == false)
                         System.Threading.Thread.Sleep(new TimeSpan(100)); // wait 10 uS
                 }
@@ -219,14 +232,14 @@ namespace ViewModel.SensorControllers
         // this takes byte arrays and serialises them into a potential packet this makes the actual processing quicker and easier.
         private void BWSerialiser(object sender, DoWorkEventArgs e)
         {
-            byte lastrecord = 0x00;
+            byte lastrecord = 0x00; 
             byte[] currentPacket = new byte[500]; // a nice big buffer in case the data has become mangled.
             int dataIndex = 0; // pointer to hold the index to the array
             foreach (var item in ArrayQueue.GetConsumingEnumerable()) // this gets each item, blocking if there is not any data, quits when CompleteAdding() is finished.
             {
-                byte[] dataIn = item;
-                int count = dataIn.Count();
-                for (int record = 0; record < count; record++)
+                byte[] dataIn = item; // get the data in
+                int count = dataIn.Count(); // find how many bytes
+                for (int record = 0; record < count; record++) // for each byte
                 {
                     currentPacket[dataIndex] = dataIn[record]; // load a byte into the staging area for a packet.
                     dataIndex++; // increment the current packet index.
@@ -239,7 +252,7 @@ namespace ViewModel.SensorControllers
                         bool hasAdded = false;
                         while (hasAdded == false)
                         {
-                            hasAdded = PacketQueue.TryAdd(dataOut);
+                            hasAdded = PacketQueue.TryAdd(dataOut); // add the data to the queue.
                             if (hasAdded == false)
                                 System.Threading.Thread.Sleep(new TimeSpan(100)); // wait 10 uS
                         }
@@ -277,10 +290,10 @@ namespace ViewModel.SensorControllers
                 {
                     //good packet.
                     ushort reading = (ushort)(((item[0] << 8) | item[1]) >> 2); // get the actual data and align right.
-                    OutputData.Add(new HotWireData(ReadingCount, reading, LastReading.Value));
-                    ReadingCount++;
-                    CurrentSensor1Reading = reading;
-                    if ((item[1] & 0x03) != 0x00)
+                    OutputData.Add(new HotWireData(ReadingCount, reading, LastReading.Value)); // add the data to the output container
+                    ReadingCount++; // update the reading count
+                    CurrentSensor1Reading = reading; //update the UI values.
+                    if ((item[1] & 0x03) != 0x00) // check the the last 3 bits are empty
                     {
                         Console.WriteLine("LOST PACKET SYNC");
                         continue;

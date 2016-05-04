@@ -7,32 +7,22 @@
 int main()
 {
 	HANDLE serialHandle;
-	CHAR *comPort = "\\\\.\\COM10";
-	serialHandle = CreateFile(comPort, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	CHAR *comPort = "\\\\.\\COM10";// variable to hold the port number
+	serialHandle = CreateFile(comPort, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0); // open the serial port
 
 	// Do some basic settings
 	DCB serialParams = { 0 };
-	serialParams.DCBlength = sizeof(serialParams);
+	serialParams.DCBlength = sizeof(serialParams);// set the length
 
-	GetCommState(serialHandle, &serialParams);
-	serialParams.BaudRate = 2000000;
-	serialParams.ByteSize = 8;
-	serialParams.StopBits = ONESTOPBIT;
-	serialParams.Parity = NOPARITY;
-	SetCommState(serialHandle, &serialParams);
+	GetCommState(serialHandle, &serialParams);// get ptr to the serial settings
+	serialParams.BaudRate = 2000000; // 2M baud
+	serialParams.ByteSize = 8; // 8 data bits
+	serialParams.StopBits = ONESTOPBIT; // one stop bit
+	serialParams.Parity = NOPARITY; // no parity bit
+	SetCommState(serialHandle, &serialParams); // apply the settings
 
-	/*	// Set timeouts
-	COMMTIMEOUTS timeout = { 0 };
-	timeout.ReadIntervalTimeout = 50;
-	timeout.ReadTotalTimeoutConstant = 50;
-	timeout.ReadTotalTimeoutMultiplier = 50;
-	timeout.WriteTotalTimeoutConstant = 50;
-	timeout.WriteTotalTimeoutMultiplier = 10;
-
-	SetCommTimeouts(serialHandle, &timeout);
-	*/
 	DWORD byteswritten;
-	byte data[] = {
+	byte data[] = { // create some sample data to send
 		0x01,0x02,0x03,0x04,0x01,0x00,
 		0x01,0x02,0x03,0x04,0x02,0x00,
 		0x01,0x02,0x03,0x04,0x03,0x00,
@@ -46,10 +36,10 @@ int main()
 		0xFF };
 	while (true)
 	{
-		WriteFile(serialHandle, data, 61, &byteswritten, NULL);
-		Sleep(2);
+		WriteFile(serialHandle, data, 61, &byteswritten, NULL); // send the data
+		Sleep(2); // wait 2 ms.
 		//	Sleep(5);
 	}
-	CloseHandle(serialHandle);
+	CloseHandle(serialHandle); // close the serial port
 	return 0;
 }

@@ -7,19 +7,19 @@
 int main()
 {
 	HANDLE serialHandle;
-	CHAR *comPort = "\\\\.\\COM13";
-	serialHandle = CreateFile(comPort, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	CHAR *comPort = "\\\\.\\COM13"; // variable to hold the port number
+	serialHandle = CreateFile(comPort, GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0); // open the serial port
 
 	// Do some basic settings
-	DCB serialParams = { 0 };
-	serialParams.DCBlength = sizeof(serialParams);
+	DCB serialParams = { 0 }; // create settings
+	serialParams.DCBlength = sizeof(serialParams); // set the length
 
-	GetCommState(serialHandle, &serialParams);
-	serialParams.BaudRate = 2000000;
-	serialParams.ByteSize = 8;
-	serialParams.StopBits = ONESTOPBIT;
-	serialParams.Parity = NOPARITY;
-	SetCommState(serialHandle, &serialParams);
+	GetCommState(serialHandle, &serialParams); // get ptr to the serial settings
+	serialParams.BaudRate = 2000000; // 2M baud
+	serialParams.ByteSize = 8; // 8 data bits
+	serialParams.StopBits = ONESTOPBIT; // one stop bit
+	serialParams.Parity = NOPARITY; // no parity bit
+	SetCommState(serialHandle, &serialParams); // update th settings
 
 
 	DWORD byteswritten;

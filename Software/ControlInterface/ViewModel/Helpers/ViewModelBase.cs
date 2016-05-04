@@ -15,9 +15,9 @@ namespace ViewModel.Helpers
 
         protected virtual void OnPropertyChanged(string propertyName)// the actual event called to trigger a notification of the property changed
         {
-            if (this.PropertyChanged != null)
+            if (this.PropertyChanged != null) // check for null condition
             {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName)); // trigger the progerty changed event.
             }
         }
         protected void OnPropertyChanged<T>(Expression<Func<T>> selectorExpression) // lambda expression compatible onpropertychanged

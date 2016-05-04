@@ -17,22 +17,24 @@ namespace ViewModel.SensorControllers
     /// </summary>
     public class StepperController : ViewModelBase
     {
-        const int StepsPerRevolution = 200;
-        const double pitchum = 1000;
-        const long stepResolutionum = (long) pitchum / StepsPerRevolution;
+        const int StepsPerRevolution = 200; // number of steps per resolution
+        const double pitchum = 1000; // the pitch of the threaded rod.
+        const long stepResolutionum = (long) pitchum / StepsPerRevolution; // the distance the float moves per step of the motor
         const bool hasPosnFeedBack = false; // if the stepper gives posn feedback.
 
-        const long ZeroPosnX = 00000;
+        // the zero position when a limit switch is triggered.
+        const long ZeroPosnX = 00000; 
         const long ZeroPosnY = 00000;
 
-        const string minDelay = "2.5";
-        const string maxDelay = "5";
+        const string minDelay = "2.5";// the delay when the motor is running at its fastest speed
+        const string maxDelay = "5"; // the delay when the motor is running at its slowest speed
 
-        string ZeroXDir = Convert.ToInt32(MotorDirection.left).ToString();
+        //what direction the motors need to move in to get to the zero/limit position
+        string ZeroXDir = Convert.ToInt32(MotorDirection.left).ToString(); 
         string ZeroYDir = Convert.ToInt32(MotorDirection.right).ToString();
 
-        SerialPort SP;
-        BackgroundWorker BgWorker = new BackgroundWorker();
+        SerialPort SP; // serial port for comms
+        BackgroundWorker BgWorker = new BackgroundWorker(); // the background worker to process the data.
         /// <summary>
         /// Initialise the stepper controller class.
         /// </summary>
@@ -41,27 +43,27 @@ namespace ViewModel.SensorControllers
         {
             //create the serial port
             SP = new SerialPort();
-            SP.BaudRate = 76800;
+            SP.BaudRate = 76800; // set the baud rate
             isConnected = false; // set the connection to not connected
             SP.DtrEnable = true; // make the device reset on connect.
-            BgWorker.DoWork += BgWorker_DoWork;
+            BgWorker.DoWork += BgWorker_DoWork; // tell the background worker what task it has to do.
         }
         // variable ONLY for use by the background worker.
         string thisCommand = string.Empty;
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            while (commands.Count() > 0)
+            while (commands.Count() > 0) // if there are commands pending
             {
-                byte[] inData = commands.Dequeue();
+                byte[] inData = commands.Dequeue(); //get the commands
                 // this routine has to sort the data into new lines.
-                foreach (byte t in inData)
+                foreach (byte t in inData) // for each byte
                 {
                    // Console.Write((char)t);
-                    thisCommand += ((char)t).ToString();
-                    if (((char)t).ToString() == "\n")
+                    thisCommand += ((char)t).ToString(); // add it to the pending command string
+                    if (((char)t).ToString() == "\n") // if it is a new line 
                     {
-                        processCommand(thisCommand);
-                        thisCommand = String.Empty;
+                        processCommand(thisCommand); // tell the worker to process the command
+                        thisCommand = String.Empty; // reset the container
                     }
                 }
             }
@@ -71,12 +73,12 @@ namespace ViewModel.SensorControllers
         {
             try
             {
-                SP.PortName = ComPort;
-                SP.Open();
+                SP.PortName = ComPort; // set the com port
+                SP.Open(); // open the serial port
                 // let some data gather before we add the event handler
                 System.Threading.Tasks.Task.Delay(5000);
                 SP.DataReceived += SP_DataReceived; // create the data receive trigger
-                if (SP.IsOpen == true)
+                if (SP.IsOpen == true) // check it connected 
                     isConnected = true;
             }
             catch (Exception)
@@ -86,13 +88,13 @@ namespace ViewModel.SensorControllers
         }
 
         public void Disconnect()
-        {
-            SP.DataReceived -= SP_DataReceived;
-            SP.Close();
-            isConnected = false;
+        {// disconnect from the stepper controller
+            SP.DataReceived -= SP_DataReceived; // remove the event handler
+            SP.Close(); // close the serial port
+            isConnected = false; // set the disconnected flag.
         }
 
-
+        //property for the connection state
         private ConnectionState _ConnectionState = ConnectionState.Disconnected;
         public ConnectionState ConnectionState
         {
@@ -105,6 +107,7 @@ namespace ViewModel.SensorControllers
                 this.SetField(ref _ConnectionState, value, () => ConnectionState);
             }
         }
+        //property to show connection flag.
         private bool _isConnected = false;
         public bool isConnected
         {
@@ -144,23 +147,28 @@ namespace ViewModel.SensorControllers
             }
         }
         #region position information
+        // mm from origin in x axis.
         public double xPositionmm
         {
             get
             {
+                //derive the location from the um reading
                 return _xPositionum / 1000.0;
             }
 
         }
+        // mm from origin in y axis.
         public double yPositionmm
         {
             get
             {
+                //derive the location from the um reading
                 return _yPositionum / 1000.0;
             }
 
         }
-        public long _yPositionum = 0;
+        // micrometers from the origin in the y.
+        private long _yPositionum = 0;
         public long yPositionum
         {
             get
@@ -169,10 +177,11 @@ namespace ViewModel.SensorControllers
             }
             private set
             {
-                this.SetField(ref _yPositionum, value, () => yPositionum);
-                this.OnPropertyChanged("yPositionmm");
+                this.SetField(ref _yPositionum, value, () => yPositionum);  // update value using helper
+                this.OnPropertyChanged("yPositionmm"); //notify a property has changed.
             }
         }
+        // micrometers from the origin in the y.
         public long _xPositionum = 0;
         public long xPositionum
         {
@@ -182,19 +191,19 @@ namespace ViewModel.SensorControllers
             }
             private set
             {
-                this.SetField(ref _xPositionum, value, () => xPositionum);
-                this.OnPropertyChanged("xPositionmm");
+                this.SetField(ref _xPositionum, value, () => xPositionum); //update value using helper
+                this.OnPropertyChanged("xPositionmm");//notify a property has changed.
             }
         }
         #endregion
-        Queue<byte[]> commands = new Queue<byte[]>(); // fifo buffer.
+        Queue<byte[]> commands = new Queue<byte[]>(); // fifo buffer of commands
         private void SP_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            int ByteCount = ((SerialPort)sender).BytesToRead;
-            byte[] buffer = new byte[ByteCount];
-            ((SerialPort)sender).Read(buffer, 0, ByteCount);
-            commands.Enqueue(buffer);
-            if (BgWorker.IsBusy == false)
+            int ByteCount = ((SerialPort)sender).BytesToRead; // number of bytes to read
+            byte[] buffer = new byte[ByteCount]; // container for the data
+            ((SerialPort)sender).Read(buffer, 0, ByteCount); // get the data.
+            commands.Enqueue(buffer); // enqueue the data to be processed by the worker
+            if (BgWorker.IsBusy == false) // check the worker is running
                 BgWorker.RunWorkerAsync(); // if the background worker has finished, give it a kick to start up again.
         }
 
@@ -207,8 +216,8 @@ namespace ViewModel.SensorControllers
             else
             {
                 // get current position and calculate the number of steps needed to move.
-                double difference = Math.Abs(xPositionum - Horizontalum) / 1000.0; // find the mm difference.
-                // find the direction
+                double difference = Math.Abs(xPositionum - Horizontalum) / 1000.0; // find the mm difference to move
+                // find the direction we need to move in
                 if (xPositionum > Horizontalum)
                     dir = MotorDirection.left;
                 else
@@ -216,7 +225,7 @@ namespace ViewModel.SensorControllers
 
                 ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
                 byte steps = (byte)((difference - (double)Revs) / (stepResolutionum/1000.0)); // get fraction of mm and divide by step resolution
-                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
+                sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1); // actually send the command
                 return true;
             }
         }
@@ -229,7 +238,7 @@ namespace ViewModel.SensorControllers
             {
                 // get current position and calculate the number of steps needed to move.
                 double difference = Math.Abs(yPositionum - Verticalum) / 1000.0; // find the mm difference.
-                // find the direction
+                // find the direction we need to move in
                 if (yPositionum > Verticalum)
                     dir = MotorDirection.right;
                 else
@@ -237,7 +246,7 @@ namespace ViewModel.SensorControllers
 
                 ushort Revs = (ushort)Math.Truncate(difference); // get the number of whole mm difference
                 byte steps = (byte)((difference - (double)Revs) / (stepResolutionum / 1000.0)); // get fraction of mm and divide by step resolution
-                sendCommand(MotorAxis.y, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);
+                sendCommand(MotorAxis.y, MotorStep.half, MotorSpeed.dynamic, dir, Revs, (byte)steps, 1);// actually send the command
                 return true;
             }
         }
@@ -245,37 +254,39 @@ namespace ViewModel.SensorControllers
 
 
         public void processCommand(string command)
-        {
+        {// this routine processes any received infomation from the controller.
         //    Console.WriteLine("Command Processing: " + command);
-            if (command == "XL\r\n" || command == "XR\r\n")
+            if (command == "XL\r\n" || command == "XR\r\n") // x axis position update
             {
-                if (command.Contains("L"))
-                    xPositionum = xPositionum - stepResolutionum;
+                if (command.Contains("L")) // left or right?
+                    xPositionum = xPositionum - stepResolutionum; // update posn value
                 else
-                    xPositionum = xPositionum + stepResolutionum;
+                    xPositionum = xPositionum + stepResolutionum;// update posn value
             }
-            else if (command == "YL\r\n" || command == "YR\r\n")
+            else if (command == "YL\r\n" || command == "YR\r\n")// y axis position update
             {
-                if (command.Contains("L"))
-                    yPositionum = yPositionum + stepResolutionum;
+                if (command.Contains("L"))// left or right?
+                    yPositionum = yPositionum + stepResolutionum;// update posn value
                 else
-                    yPositionum = yPositionum - stepResolutionum;
+                    yPositionum = yPositionum - stepResolutionum;// update posn value
             }
-            else if (command == "STEPPER V1. ENTER CONFIG\r\n")
+            else if (command == "STEPPER V1. ENTER CONFIG\r\n") // the sensor has just updated.
             {
+                //send the control variables to the controller.
                 //slow speed fast speed dirx diry
                 SP.Write(minDelay + " " + maxDelay + " " + ZeroXDir+" " + ZeroYDir + "\r\n"); // give the max speed delay and the min speed delay
             }
-            else if (command == "ZEROED\r\n")
+            else if (command == "ZEROED\r\n") // the motors have just zeroed.
             {
+                //update the positions to the zero value
                 xPositionum = ZeroPosnX;
                 yPositionum = ZeroPosnY;
             }
-            else if (command == "OK WAIT\r\n")
+            else if (command == "OK WAIT\r\n") // this command is sent after a zero, initialise the controller to operate mode with a zero position move.
             {
                 sendCommand(MotorAxis.x, MotorStep.half, MotorSpeed.fast, MotorDirection.left, 0, 0, 0);
             }
-            else if (command == "OK DONE\r\n")
+            else if (command == "OK DONE\r\n") // the controller has just finished the movement
             {
                 isBusy = false; // we are not busy anymore.
             }
@@ -283,7 +294,8 @@ namespace ViewModel.SensorControllers
 
         public void sendCommand(MotorAxis xy, MotorStep stepMode, MotorSpeed speed, MotorDirection dir, ushort rotations, byte steps, byte holdTime)
         {
-            byte[] command = new byte[10];
+            //this routine constructs the commands to be sent to the motor using the enum class.
+            byte[] command = new byte[10]; // allocate the data to be populated
             command[0] = byte.Parse(Convert.ToInt32(xy).ToString()); // MOTOR
             command[1] = byte.Parse(Convert.ToInt32(stepMode).ToString()); // STEPMODE
             command[2] = byte.Parse(Convert.ToInt32(speed).ToString());// SPEED
@@ -294,8 +306,8 @@ namespace ViewModel.SensorControllers
             command[7] = holdTime; // how long to hold after the command.
             command[8] = (byte)'\r';
             command[9] = (byte)'\n';
-            SP.Write(command, 0, 10);
-            isBusy = true;
+            SP.Write(command, 0, 10); // send the command down the serial line.
+            isBusy = true; // set the controller to the busy state.
         }
 
     }
